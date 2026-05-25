@@ -3,7 +3,7 @@
    Einziger Ort, der localStorage kennt und beschreibt.
    ============================================================ */
 
-const STORAGE_KEY = "fc-state-v3";
+const STORAGE_KEY = "fc-state-v4";
 
 let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
 
@@ -49,6 +49,16 @@ function setAmt(id, val) {
   save();
 }
 
+/* --- Names (überschriebene Bezeichnungen für Einnahmen/Ausgaben) --- */
+function getName(id, def) {
+  return state.names?.[id] ?? def;
+}
+function setName(id, val) {
+  if (!state.names) state.names = {};
+  state.names[id] = val;
+  save();
+}
+
 /* --- Kumulierter Überschuss --- */
 function getSurplus(key) {
   return state.surplusEntries?.[key] ?? null;
@@ -62,16 +72,18 @@ function getKumuliert() {
   return Object.values(state.surplusEntries || {}).reduce((s, v) => s + v, 0);
 }
 
-/* --- Helpers: Income & Expenses mit gespeicherten Beträgen --- */
+/* --- Helpers: Income & Expenses mit gespeicherten Namen & Beträgen --- */
 function getIncome() {
   return INCOME_BASE_DEF.map((p) => ({
     ...p,
+    name: getName("inc_" + p.id, p.name),
     amount: getAmt("inc_" + p.id, p.amount),
   }));
 }
 function getExpenses() {
   return EXPENSES_DEF.map((p) => ({
     ...p,
+    name: getName("exp_" + p.id, p.name),
     amount: getAmt("exp_" + p.id, p.amount),
   }));
 }
@@ -136,6 +148,16 @@ function delExtraIncome(id) {
   const k = getKey();
   if (!state[k]?.extraIncome) return;
   state[k].extraIncome = state[k].extraIncome.filter((e) => e.id !== id);
+  save();
+  render();
+}
+function editExtraIncome(id, newName, newAmt) {
+  const k = getKey();
+  if (!state[k]?.extraIncome) return;
+  const item = state[k].extraIncome.find((e) => e.id === id);
+  if (!item) return;
+  item.name = newName;
+  item.amount = newAmt;
   save();
   render();
 }

@@ -6,7 +6,7 @@ function fmt(n) {
   return n.toFixed(2).replace(".", ",") + " €";
 }
 function progColor(pct) {
-  return pct >= 100 ? "var(--green)" : "var(--yellow)";
+  return pct >= 100 ? "var(--accent-2)" : "var(--accent)";
 }
 function showToast(msg) {
   const t = document.getElementById("toast");
@@ -14,26 +14,58 @@ function showToast(msg) {
   t.classList.add("show");
   setTimeout(() => t.classList.remove("show"), 2800);
 }
-
-/* --- Inline Edit (Zahlungen) --- */
-function startEdit(id, isIncome, currentAmt, el) {
-  el.innerHTML = `<input class="inline-input" id="ei-${id}" value="${currentAmt.toFixed(2)}" type="number" step="0.01" min="0" /><button class="confirm-btn" onclick="confirmEdit('${id}',${isIncome})">✓</button>`;
-  const inp = document.getElementById("ei-" + id);
-  inp.focus();
-  inp.select();
-  inp.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") confirmEdit(id, isIncome);
-    if (e.key === "Escape") render();
-  });
+function escAttr(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
-function confirmEdit(id, isIncome) {
-  const inp = document.getElementById("ei-" + id);
-  if (!inp) return;
-  const val = parseFloat(inp.value);
-  if (isNaN(val) || val < 0) return;
-  setAmt((isIncome ? "inc_" : "exp_") + id, val);
-  render();
-  showToast("✓ Betrag gespeichert");
+
+/* --- Inline Edit (Zahlungen) ---
+   rowType: "income" | "expense" | "extra"
+   Bearbeitet Name UND Betrag gleichzeitig. */
+function startEdit(rowEl) {
+  const id = rowEl.dataset.id;
+  const rowType = rowEl.dataset.type;
+  const currentName = rowEl.dataset.name;
+  const currentAmt = parseFloat(rowEl.dataset.amt);
+  rowEl.onclick = null;
+  rowEl.classList.remove("clickable");
+  rowEl.classList.add("editing");
+  rowEl.innerHTML = `
+    <input class="inline-input name-edit" id="ne-${id}" value="${escAttr(currentName)}" placeholder="Name" />
+    <div class="amt-wrap">
+      <input class="inline-input amt-edit" id="ei-${id}" value="${currentAmt.toFixed(2)}" type="number" step="0.01" min="0" />
+      <button class="confirm-btn" onclick="confirmEdit('${rowType}','${id}')">✓</button>
+    </div>`;
+  const nameInp = document.getElementById("ne-" + id);
+  const amtInp = document.getElementById("ei-" + id);
+  nameInp.focus();
+  nameInp.select();
+  const handler = (e) => {
+    if (e.key === "Enter") confirmEdit(rowType, id);
+    if (e.key === "Escape") render();
+  };
+  nameInp.addEventListener("keydown", handler);
+  amtInp.addEventListener("keydown", handler);
+}
+function confirmEdit(rowType, id) {
+  const nameInp = document.getElementById("ne-" + id);
+  const amtInp = document.getElementById("ei-" + id);
+  if (!nameInp || !amtInp) return;
+  const newName = nameInp.value.trim();
+  const newAmt = parseFloat(amtInp.value);
+  if (!newName || isNaN(newAmt) || newAmt < 0) return;
+  if (rowType === "extra") {
+    editExtraIncome(id, newName, newAmt);
+  } else {
+    const prefix = rowType === "income" ? "inc_" : "exp_";
+    setName(prefix + id, newName);
+    setAmt(prefix + id, newAmt);
+    render();
+  }
+  showToast("✓ Gespeichert");
 }
 
 /* --- Kumulierter Überschuss Box --- */
@@ -112,19 +144,16 @@ function render() {
     .map((p) => {
       const done = isIncPaid(p.id);
       const isExtra = !INCOME.find((b) => b.id === p.id);
+      const rowType = isExtra ? "extra" : "income";
       const delBtn = isExtra
         ? `<button class="del-btn" onclick="event.stopPropagation();delExtraIncome('${p.id}')">✕</button>`
         : "";
       const dayTxt = p.day
         ? `<span style="font-size:14px;font-weight:600;color:var(--text3);margin-left:6px">→ ${p.day}</span>`
         : "";
-      const amtId = `amt-inc-${p.id}`;
-      const editPart = isExtra
-        ? ""
-        : ` <button class="edit-btn" onclick="event.stopPropagation();startEdit('${p.id}',true,${p.amount},document.getElementById('${amtId}'))">✎</button>`;
-      return `<div class="row clickable${done ? " done" : ""}" onclick="toggleInc('${p.id}')">
+      return `<div class="row clickable${done ? " done" : ""}" data-id="${p.id}" data-type="${rowType}" data-name="${escAttr(p.name)}" data-amt="${p.amount}" onclick="toggleInc('${p.id}')">
       <div style="display:flex;align-items:center"><div class="cb${done ? " blue" : ""}"></div><span class="rname">${p.name}${dayTxt}</span>${delBtn}</div>
-      <div class="amt-wrap"><span class="amount green" id="${amtId}">+${fmt(p.amount)}</span>${editPart}</div>
+      <div class="amt-wrap"><span class="amount green">+${fmt(p.amount)}</span><button class="edit-btn" onclick="event.stopPropagation();startEdit(this.closest('.row'))">✎</button></div>
     </div>`;
     })
     .join("");
@@ -143,20 +172,16 @@ function render() {
       label: p.cat,
     };
     const tag = `<span class="badge" style="background:${cat.bg};color:${cat.color}">${p.yearly ? "p.a." : p.quarterly ? "p.Q." : cat.label}</span>`;
-    const vTag = p.vater
-      ? `<span class="badge" style="background:rgba(128,128,128,0.1);color:var(--text3)">Vater</span>`
-      : "";
     const sub =
       p.yearly || p.quarterly
         ? `<div class="sub-amount">${fmt(p.amount)} ${p.yearly ? "p.a." : "p.Q."}</div>`
         : "";
-    const amtId = `amt-exp-${p.id}`;
-    return `<div class="row clickable${done ? " done" : ""}" onclick="toggleExp('${p.id}')">
-      <div style="display:flex;align-items:center"><div class="cb${done ? " green" : ""}"></div><span class="rname">${p.name}${tag}${vTag}</span></div>
+    return `<div class="row clickable${done ? " done" : ""}" data-id="${p.id}" data-type="expense" data-name="${escAttr(p.name)}" data-amt="${p.amount}" onclick="toggleExp('${p.id}')">
+      <div style="display:flex;align-items:center"><div class="cb${done ? " green" : ""}"></div><span class="rname">${p.name}${tag}</span></div>
       <div style="text-align:right">
         <div class="amt-wrap" style="justify-content:flex-end">
-          <button class="edit-btn" onclick="event.stopPropagation();startEdit('${p.id}',false,${p.amount},document.getElementById('${amtId}').parentElement)">✎</button>
-          <div class="amount${done ? " gray" : " red"}" id="${amtId}">${fmt(dispAmt)}</div>
+          <button class="edit-btn" onclick="event.stopPropagation();startEdit(this.closest('.row'))">✎</button>
+          <div class="amount${done ? " gray" : " red"}">${fmt(dispAmt)}</div>
         </div>${sub}
       </div>
     </div>`;

@@ -5,10 +5,22 @@
 
 /* --- Datum in Topbar --- */
 const now = new Date();
-document.getElementById("topdate").textContent = now.toLocaleDateString(
-  "de-DE",
-  { day: "2-digit", month: "2-digit", year: "numeric" },
-);
+const dd = String(now.getDate()).padStart(2, "0");
+const mm = String(now.getMonth() + 1).padStart(2, "0");
+const yyyy = now.getFullYear();
+document.getElementById("topdate").textContent = `${dd}.${mm}.${yyyy}`;
+
+/* --- Issue-Nummer: fortlaufende Ausgabe seit Januar 2025 --- */
+function updateIssueNum() {
+  const sM = document.getElementById("selMonth");
+  const sY = document.getElementById("selYear");
+  if (!sM || !sY) return;
+  const m = parseInt(sM.value);
+  const y = parseInt(sY.value);
+  const num = (y - 2025) * 12 + m + 1;
+  const el = document.getElementById("issuenum");
+  if (el) el.textContent = String(num).padStart(3, "0");
+}
 
 /* --- Monats- und Jahres-Selector befüllen --- */
 const selM = document.getElementById("selMonth");
@@ -57,11 +69,18 @@ function showTab(name, el) {
 }
 
 /* --- Monat/Jahr Wechsel löst Re-Render aus --- */
-selM.addEventListener("change", render);
-selY.addEventListener("change", render);
+selM.addEventListener("change", () => {
+  render();
+  updateIssueNum();
+});
+selY.addEventListener("change", () => {
+  render();
+  updateIssueNum();
+});
 
 /* --- Initialer Render --- */
 updateLastExportInfo();
+updateIssueNum();
 render();
 renderRoutine();
 renderTips();
