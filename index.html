@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Finanz-Cockpit</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+
+<!-- ============================================================
+     TOPBAR
+     ============================================================ -->
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="date-badge" id="topdate"></span>
+  </div>
+  <div class="topbar-center">
+    <img src="assets/logo.svg" class="logo-svg" alt="Finanz-Cockpit Logo">
+    <h1>Finanz-Cockpit</h1>
+  </div>
+  <div class="topbar-right">
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
+    <button class="io-btn btn-export" onclick="exportData()">EXP</button>
+    <button class="io-btn btn-import" onclick="document.getElementById('importFile').click()">IMP</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ============================================================
+     MAIN CONTAINER
+     ============================================================ -->
+<div class="container">
+
+  <!-- Navigation -->
+  <div class="topnav">
+    <div class="tabs">
+      <div class="tab active" onclick="showTab('zahlungen',this)">Zahlungen</div>
+      <div class="tab" onclick="showTab('haushalt',this)">Haushalt</div>
+      <div class="tab" onclick="showTab('routine',this)">Routine</div>
+      <div class="tab" onclick="showTab('tipps',this)">Finanztipps</div>
+      <div class="tab" onclick="showTab('backup',this)">Sicherung</div>
+    </div>
+    <div class="month-sel">
+      <select id="selMonth"></select>
+      <select id="selYear"></select>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       TAB: ZAHLUNGEN
+       ============================================================ -->
+  <div id="tab-zahlungen" class="page active">
+    <div class="metrics-row" id="metrics-top"></div>
+    <p class="hint">✎ Bewege die Maus über eine Zeile und klicke den Stift um den Betrag zu ändern.</p>
+
+    <div class="two-col">
+      <!-- Einnahmen -->
+      <div>
+        <div class="prog-block">
+          <div class="prog-info">
+            <span>Einnahmen eingegangen</span>
+            <span id="prog-inc-label">0 / 0</span>
+          </div>
+          <div class="prog-wrap"><div class="prog-bar" id="prog-inc-bar" style="width:0%"></div></div>
+        </div>
+        <div class="sec-label">Einnahmen</div>
+        <div class="panel">
+          <div id="income-list"></div>
+          <div class="add-income">
+            <input id="add-inc-name" placeholder="Zusätzliche Einnahme" />
+            <input id="add-inc-amt" placeholder="Betrag €" style="max-width:100px" type="number" step="0.01" min="0" />
+            <button onclick="addIncome()">+ Hinzufügen</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ausgaben -->
+      <div>
+        <div class="prog-block">
+          <div class="prog-info">
+            <span>Fixkosten bezahlt</span>
+            <span id="prog-exp-label">0 / 0</span>
+          </div>
+          <div class="prog-wrap"><div class="prog-bar" id="prog-exp-bar" style="width:0%"></div></div>
+        </div>
+        <div class="sec-label">Fixausgaben</div>
+        <div class="panel" id="expense-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       TAB: HAUSHALT
+       ============================================================ -->
+  <div id="tab-haushalt" class="page">
+    <p class="hint">✎ Bewege die Maus über einen Wert und klicke den Stift um ihn zu ändern.</p>
+    <div class="three-col">
+
+      <!-- Vermögen -->
+      <div>
+        <div class="summary-box">
+          <h3>Vermögen</h3>
+          <div class="srow"><span>ETF + Krypto TR</span><div class="sval"><span style="color:var(--green)" id="hv-etf-tr">5.157,21 €</span><button class="edit-btn" onclick="editHaushalt('etf-tr',5157.21,'ETF + Krypto TR')">✎</button></div></div>
+          <div class="srow"><span>ETF Scalable</span><div class="sval"><span style="color:var(--green)" id="hv-etf-sc">3.195,12 €</span><button class="edit-btn" onclick="editHaushalt('etf-sc',3195.12,'ETF Scalable')">✎</button></div></div>
+          <div class="srow"><span>Krypto Ledger</span><div class="sval"><span style="color:var(--green)" id="hv-krypto">2.152,16 €</span><button class="edit-btn" onclick="editHaushalt('krypto',2152.16,'Krypto Ledger')">✎</button></div></div>
+          <div class="srow"><span>TR Tagesgeld</span><div class="sval"><span style="color:var(--green)" id="hv-tg">400,21 €</span><button class="edit-btn" onclick="editHaushalt('tg',400.21,'TR Tagesgeld')">✎</button></div></div>
+          <div class="srow"><span>Girokonto</span><div class="sval"><span style="color:var(--green)" id="hv-giro">155,73 €</span><button class="edit-btn" onclick="editHaushalt('giro',155.73,'Girokonto')">✎</button></div></div>
+          <div class="srow"><span>Barreserve (Vater)</span><div class="sval"><span style="color:var(--green)" id="hv-bar">7.780,00 €</span><button class="edit-btn" onclick="editHaushalt('bar',7780,'Barreserve')">✎</button></div></div>
+          <div class="srow"><span>TARGO Kredit</span><div class="sval"><span style="color:var(--red)" id="hv-kredit">−15.000,00 €</span><button class="edit-btn" onclick="editHaushalt('kredit',15000,'TARGO Kredit (Restschuld)')">✎</button></div></div>
+          <div class="srow total"><span>Nettovermögen</span><span style="color:var(--amber)" id="hv-netto">3.842,00 €</span></div>
+        </div>
+      </div>
+
+      <!-- Monatsrechnung -->
+      <div>
+        <div class="summary-box">
+          <h3>Monatsrechnung</h3>
+          <div class="srow"><span>Gehalt Aki</span><div class="sval"><span style="color:var(--green)" id="hv-gehalt">2.600,00 €</span><button class="edit-btn" onclick="editHaushalt('gehalt',2600,'Gehalt Aki (netto)')">✎</button></div></div>
+          <div class="srow"><span>Pflegegeld AOK</span><div class="sval"><span style="color:var(--green)" id="hv-pflege">347,00 €</span><button class="edit-btn" onclick="editHaushalt('pflege',347,'Pflegegeld AOK')">✎</button></div></div>
+          <div class="srow"><span>Einnahmen Vater</span><div class="sval"><span style="color:var(--green)" id="hv-vater-in">853,46 €</span><button class="edit-btn" onclick="editHaushalt('vater-in',853.46,'Einnahmen Vater')">✎</button></div></div>
+          <div class="srow total"><span>Gesamteinnahmen</span><span style="color:var(--green)" id="hv-gesamt-in">3.800,46 €</span></div>
+          <div class="srow" style="margin-top:8px"><span>Fixkosten Aki (∅)</span><div class="sval"><span style="color:var(--red)" id="hv-fix-aki">−2.196,98 €</span><button class="edit-btn" onclick="editHaushalt('fix-aki',2196.98,'Fixkosten Aki ∅')">✎</button></div></div>
+          <div class="srow"><span>Fixkosten Vater (∅)</span><div class="sval"><span style="color:var(--red)" id="hv-fix-vater">−79,44 €</span><button class="edit-btn" onclick="editHaushalt('fix-vater',79.44,'Fixkosten Vater ∅')">✎</button></div></div>
+          <div class="srow"><span>Sparpläne</span><div class="sval"><span style="color:var(--text2)" id="hv-spar">−500,50 €</span><button class="edit-btn" onclick="editHaushalt('spar',500.50,'Sparpläne')">✎</button></div></div>
+          <div class="srow"><span>Variables Budget</span><div class="sval"><span style="color:var(--text2)" id="hv-var">−700,00 €</span><button class="edit-btn" onclick="editHaushalt('var',700,'Variables Budget')">✎</button></div></div>
+          <div class="srow total"><span>Überschuss</span><span style="color:var(--green)" id="hv-ueberschuss">+323,54 €</span></div>
+        </div>
+      </div>
+
+      <!-- Barreserve & Kredit -->
+      <div>
+        <div class="summary-box">
+          <h3>Barreserve</h3>
+          <div class="srow"><span>Aktuell</span><div class="sval"><span id="hv-bar2">7.780,00 €</span><button class="edit-btn" onclick="editHaushalt('bar',7780,'Barreserve')">✎</button></div></div>
+          <div class="srow"><span>Geplante Ausgabe</span><div class="sval"><span style="color:var(--red)" id="hv-urlaub">−2.000,00 €</span><button class="edit-btn" onclick="editHaushalt('urlaub',2000,'Geplante Ausgabe')">✎</button></div></div>
+          <div class="srow"><span>Nach Ausgabe</span><span style="color:var(--amber)" id="hv-nach-urlaub">5.780,00 €</span></div>
+          <div class="srow"><span>Ziel</span><div class="sval"><span id="hv-bar-ziel">12.000,00 €</span><button class="edit-btn" onclick="editHaushalt('bar-ziel',12000,'Barreserve Ziel')">✎</button></div></div>
+          <div class="srow"><span>Fehlbetrag</span><span style="color:var(--red)" id="hv-fehl">−6.220,00 €</span></div>
+          <div class="srow total"><span id="hv-monate-label">~19 Monate à 320 €</span><span style="color:var(--amber)">→ 12.000 €</span></div>
+        </div>
+        <div class="summary-box">
+          <h3>TARGO Kredit</h3>
+          <div class="srow"><span>Restschuld</span><div class="sval"><span style="color:var(--red)" id="hv-kredit2">~15.000 €</span><button class="edit-btn" onclick="editHaushalt('kredit',15000,'TARGO Restschuld')">✎</button></div></div>
+          <div class="srow"><span>Rate</span><div class="sval"><span style="color:var(--red)" id="hv-rate">433,40 €/Monat</span><button class="edit-btn" onclick="editHaushalt('rate',433.40,'Monatliche Rate')">✎</button></div></div>
+          <div class="srow"><span>Zins</span><span style="color:var(--red)">8,48 % p.a.</span></div>
+          <div class="srow total"><span>Frei mit 50</span><span style="color:var(--green)">✓</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       TAB: ROUTINE
+       ============================================================ -->
+  <div id="tab-routine" class="page">
+    <div class="prog-block" style="margin-bottom:16px">
+      <div class="prog-info">
+        <span>Monatsroutine ausgeführt</span>
+        <span id="prog-routine-label">0 / 10</span>
+      </div>
+      <div class="prog-wrap"><div class="prog-bar" id="prog-routine-bar" style="width:0%"></div></div>
+    </div>
+    <div id="routine-list"></div>
+  </div>
+
+  <!-- ============================================================
+       TAB: FINANZTIPPS
+       ============================================================ -->
+  <div id="tab-tipps" class="page">
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div><span>Kritisch</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div><span>Hoch</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div><span>Mittel</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div><span>Langfristig</span></div>
+    </div>
+    <div id="tips-list"></div>
+    <div class="archive-toggle" id="arc-toggle" onclick="toggleArchive()">
+      <span>Archiv — verworfene Empfehlungen</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="arc-count" id="arc-count">0</span>
+        <span class="arc-arrow" id="arc-arrow">▼</span>
+      </div>
+    </div>
+    <div class="archive-body" id="archive-body"></div>
+    <div class="info-footer">Weitere Fragen? Öffne Claude.ai — ich bin dein persönlicher Finanzberater.</div>
+  </div>
+
+  <!-- ============================================================
+       TAB: SICHERUNG
+       ============================================================ -->
+  <div id="tab-backup" class="page">
+    <div class="two-col">
+      <div>
+        <div class="backup-info">
+          <strong>Export</strong> — speichert alle Eintragungen und angepassten Beträge als <code>.json</code> Datei.<br><br>
+          <strong>Import</strong> — stellt deinen Stand vollständig wieder her.<br><br>
+          <strong>Empfehlung:</strong> Immer vor einem HTML-Update exportieren.
+          <div class="last-export" id="last-export-info">Noch kein Export gespeichert.</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="big-btn" onclick="exportData()" style="border-color:var(--accent);color:var(--accent);">↓ Exportieren</button>
+          <button class="big-btn" onclick="document.getElementById('importFile').click()" style="border-color:var(--yellow);color:var(--yellow);">↑ Importieren</button>
+        </div>
+      </div>
+      <div>
+        <div class="summary-box">
+          <h3>Was wird gespeichert</h3>
+          <div class="srow"><span>Abgehakte Einnahmen &amp; Kosten</span><span style="color:var(--green)">✓</span></div>
+          <div class="srow"><span>Angepasste Beträge</span><span style="color:var(--green)">✓</span></div>
+          <div class="srow"><span>Erledigte Monatsroutine</span><span style="color:var(--green)">✓</span></div>
+          <div class="srow"><span>Extra-Einnahmen</span><span style="color:var(--green)">✓</span></div>
+          <div class="srow"><span>Finanztipps-Status</span><span style="color:var(--green)">✓</span></div>
+          <div class="srow"><span>Dark / Light Mode</span><span style="color:var(--green)">✓</span></div>
+          <div class="srow"><span>Kumulierter Überschuss</span><span style="color:var(--green)">✓</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<!-- ============================================================
+     SCRIPTS — Reihenfolge ist wichtig:
+     data → state → render → haushalt → app
+     ============================================================ -->
+<script src="js/data.js"></script>
+<script src="js/state.js"></script>
+<script src="js/render.js"></script>
+<script src="js/haushalt.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>

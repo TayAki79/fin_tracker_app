@@ -1,0 +1,95 @@
+/* ============================================================
+   LAYOUT — Topbar, Container, Grid, Navigation
+   ============================================================ */
+
+/* --- Topbar --- */
+.topbar {
+  background: var(--bg2);
+  border-bottom: 4px solid var(--border);
+  padding: 10px 20px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.topbar-left  { display: flex; align-items: center; }
+.topbar-center { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.topbar-right  { display: flex; align-items: center; gap: 6px; justify-content: flex-end; }
+.topbar h1 {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.date-badge {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text3);
+}
+.logo-svg { width: 32px; height: 32px; flex-shrink: 0; }
+
+/* --- Container & Grids --- */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 18px 16px;
+}
+.two-col   { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.metrics-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+
+@media (max-width: 900px) {
+  .two-col,
+  .three-col { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .metrics-row { grid-template-columns: 1fr 1fr; }
+}
+
+/* --- Top Navigation --- */
+.topnav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.month-sel { display: flex; gap: 6px; }
+
+select {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 6px 10px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg3);
+  color: var(--text);
+  cursor: pointer;
+}
+select:focus { outline: none; border-color: var(--accent); }
+
+/* --- Tabs --- */
+.tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+.tab {
+  padding: 6px 16px;
+  border-radius: 6px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text2);
+  transition: all 0.15s;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+.tab:hover { color: var(--text); border-color: var(--border); }
+.tab.active { background: var(--bg3); border-color: var(--accent); color: var(--accent); }
+
+/* --- Pages --- */
+.page { display: none; }
+.page.active { display: block; }

@@ -1,0 +1,53 @@
+/* ============================================================
+   BASE — Reset, CSS-Variablen, Fonts
+   ============================================================ */
+
+:root {
+  --bg: #0a0a0f;
+  --bg2: #111118;
+  --bg3: #16161f;
+  --border: rgba(255, 255, 255, 0.12);
+  --border2: rgba(255, 255, 255, 0.22);
+  --text: #f0f0f8;
+  --text2: #9898b8;
+  --text3: #5a5a7a;
+  --accent: #6c63ff;
+  --green: #00d4aa;
+  --red: #ff4d6d;
+  --amber: #ffaa00;
+  --blue: #4d9fff;
+  --yellow: #e6a817;
+  --purple: #9d6cff;
+}
+
+[data-theme="light"] {
+  --bg: #f0f0f5;
+  --bg2: #ffffff;
+  --bg3: #e8e8f0;
+  --border: rgba(0, 0, 0, 0.12);
+  --border2: rgba(0, 0, 0, 0.22);
+  --text: #0a0a1a;
+  --text2: #44446a;
+  --text3: #8888aa;
+  --accent: #5a52e0;
+  --green: #008f72;
+  --red: #cc2244;
+  --amber: #cc8800;
+  --blue: #1a6fcc;
+  --yellow: #b87a00;
+  --purple: #7a44cc;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Space Grotesk", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-weight: 500;
+}
