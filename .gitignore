@@ -20,6 +20,9 @@ localstorage-*.json
 secrets/
 credentials.json
 
+# Lokale Supabase-Credentials (Project-URL + anon key)
+js/config.js
+
 # ============================================================
 #  Editor / IDE
 # ============================================================

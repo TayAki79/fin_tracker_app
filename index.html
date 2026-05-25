@@ -246,12 +246,15 @@
 <!-- ============================================================
      SCRIPTS — Reihenfolge ist wichtig:
      data → state → render → haushalt → app
+     supabase-client.js läuft als ES-Modul (deferred), schreibt sich
+     selbst auf window.supabase nach DOM-Ready.
      ============================================================ -->
 <script src="js/data.js"></script>
 <script src="js/state.js"></script>
 <script src="js/render.js"></script>
 <script src="js/haushalt.js"></script>
 <script src="js/app.js"></script>
+<script type="module" src="js/supabase-client.js"></script>
 
 </body>
 </html>

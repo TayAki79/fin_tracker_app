@@ -1,14 +1,27 @@
 # Finanz-Cockpit
 
-Persönliche Finanz-Tracker-Web-App (auf Deutsch). Reine Client-App, keine Backend-Anbindung, kein Build-Tool, kein Framework.
+Finanz-Tracker (auf Deutsch). **In Migration vom Personal-Tool zur Multi-User-SaaS.** Aktueller Zustand: Vanilla-Frontend + Supabase-Backend (Phase 1).
 
 ## Tech Stack
 
-- **HTML + CSS + Vanilla JavaScript** — kein Build, kein npm, keine Dependencies
-- **localStorage** als einzige Persistenzschicht
+- **HTML + CSS + Vanilla JavaScript** — kein Build, keine npm-Dependencies
+- **Supabase** (Postgres + Auth + Storage, EU-Region Frankfurt) als Backend — siehe `docs/supabase-schema.md`
 - **Google Fonts** (Fraunces, Bricolage Grotesque, JetBrains Mono) via CDN
+- **Supabase JS Client** via ESM-CDN (`https://esm.sh/@supabase/supabase-js@2`) — einziges Modul-Script
 
-Bewusste Entscheidung: keine Frameworks, kein Build. Die App soll durch Doppelklick auf `index.html` lauffähig sein.
+Vanilla bleibt — solange es trägt. Build-Step wird eingeführt, wenn die Komplexität es zwingt.
+
+## Lokale Entwicklung
+
+⚠️ **Doppelklick auf `index.html` funktioniert nicht mehr** — ES-Module brauchen HTTP-CORS.
+
+```bash
+# Im Projekt-Root:
+python -m http.server 8765
+# dann http://localhost:8765 öffnen
+```
+
+Vor erstem Start: `js/config.example.js` nach `js/config.js` kopieren und Supabase-Credentials eintragen (siehe Kommentare in der Datei). `js/config.js` ist gitignored.
 
 ## Projektstruktur
 
@@ -21,12 +34,21 @@ fin_tracker_web/
 │   ├── base.css            # CSS-Variablen, Themes, Typografie, Atmosphäre
 │   ├── layout.css          # Topbar, Container, Grids, Tabs, Navigation
 │   └── components.css      # Buttons, Panels, Rows, Inputs, alle UI-Elemente
+├── docs/
+│   └── supabase-schema.md  # Datenbankschema-Doku (lesbar, mit SQL)
+├── supabase/
+│   ├── etappe-a-tables.sql # Tabellen + Indexe + Trigger
+│   ├── etappe-b-rls.sql    # Row-Level-Security-Policies
+│   └── etappe-c-bootstrap.sql # Signup-Trigger (Auto-Bootstrap neuer User)
 └── js/                     # Reihenfolge in index.html ist KRITISCH
     ├── data.js             # Statische Defaults (INCOME_BASE_DEF, EXPENSES_DEF, ROUTINE_ITEMS, TIPS_DATA, CAT)
-    ├── state.js            # localStorage-Abstraktion (STORAGE_KEY = "fc-state-v4")
+    ├── state.js            # localStorage-Abstraktion (STORAGE_KEY = "fc-state-v4") — wird in Phase 1 durch Supabase ersetzt
     ├── render.js           # DOM-Rendering für Zahlungen, Routine, Tipps
     ├── haushalt.js         # Haushalt-Tab: Vermögen, Monatsrechnung, Barreserve, Kredit
-    └── app.js              # Init, Theme-Toggle, Tab-Switching, Datum, Issue-Nummer
+    ├── app.js              # Init, Theme-Toggle, Tab-Switching, Datum, Issue-Nummer
+    ├── config.example.js   # Vorlage für Supabase-Credentials (committed)
+    ├── config.js           # echte Credentials — GITIGNORED
+    └── supabase-client.js  # ES-Modul: erzeugt window.supabase
 ```
 
 ## Script-Reihenfolge
@@ -106,35 +128,27 @@ Alles im `localStorage`:
 
 ## Konventionen
 
-- **Globale Funktionen**, keine Module. `addIncome()`, `toggleTheme()`, `render()` etc. liegen am `window`.
+- **Globale Funktionen**, keine Module — *Ausnahme:* `supabase-client.js` ist ein ES-Modul und schreibt sich auf `window.supabase`. Die anderen Skripte bleiben non-module und legen Funktionen am `window`-Objekt ab (`addIncome()`, `toggleTheme()`, `render()`, …).
 - **Inline-`onclick` im HTML**, kein zentrales Event-Binding. Beim Hinzufügen neuer Buttons im gleichen Stil weitermachen.
 - **Re-Render statt diff** — nach jedem State-Change wird `render()` / `renderTips()` / `updateHaushalt()` aufgerufen, das DOM komplett neu erzeugt.
 - **CSS-Variablen** in `:root` und `[data-theme="light"]` — Themes werden ausschließlich darüber gesteuert. Keine hardcodierten Farben in `components.css`.
 - **Geldbeträge** mit `fmt(n)` formatieren — gibt `"1.234,56 €"` zurück (deutsches Format, Komma als Dezimaltrenner).
 - **IDs sind stabile Identifier**, Namen sind frei editierbar. Niemals die `id` ändern, nur den `name`.
 
-## Lokal laufen lassen
-
-Doppelklick auf `index.html` reicht. Für saubere Entwicklung mit Hot-Reload:
-
-```bash
-python -m http.server 8765
-# dann http://localhost:8765 öffnen
-```
-
-Es gibt keinen npm-Workflow.
-
 ## Was NICHT tun
 
-- **Kein Framework hinzufügen** (React, Vue, Svelte etc.). Die App ist bewusst Vanilla.
-- **Keinen Build-Schritt einführen** (Vite, Webpack, esbuild). HTML/CSS/JS werden direkt vom Browser geladen.
-- **Keine Datei-IDs ändern** in `INCOME_BASE_DEF` / `EXPENSES_DEF` — alle existierenden localStorage-Verknüpfungen würden brechen.
-- **Script-Reihenfolge in `index.html`** nicht umstellen — Funktionen aus späteren Skripten sind beim Laden früherer noch nicht definiert.
-- **Personenbezogene Daten** in `data.js` (oder anderswo im Code) hinterlegen — alles Konkrete gehört in localStorage. Defaults sind generische Beispielwerte.
+- **Kein Framework hinzufügen** (React, Vue, Svelte etc.) — solange Vanilla trägt.
+- **Keinen Build-Schritt einführen** (Vite, Webpack, esbuild) — solange CDN-Imports reichen. Wenn die Komplexität es zwingt (z.B. mehrere Module, TypeScript), neu evaluieren.
+- **Keine Slug-Werte** in `INCOME_BASE_DEF` / `EXPENSES_DEF` (oder den entsprechenden Supabase-Seed-Defaults) ändern — würde bestehende User-Daten von ihren Defaults entkoppeln.
+- **Script-Reihenfolge in `index.html`** nicht umstellen — non-module Funktionen aus späteren Skripten sind beim Laden früherer noch nicht definiert.
+- **`js/config.js` niemals committen** — enthält Supabase-Credentials. Ist in `.gitignore`. Nur `config.example.js` (mit Platzhaltern) ist im Repo.
+- **`service_role`-Key niemals ins Frontend** — gehört ausschließlich in Supabase Edge Functions.
+- **Personenbezogene Daten** in `data.js` (oder anderswo im Code) hinterlegen — alles Konkrete gehört ins Backend bzw. die Defaults bleiben generisch.
 
 ## Verlauf wichtiger Schema-Änderungen
 
-- `fc-state-v3` → `fc-state-v4`: Einführung von `state.names` (User kann Namen überschreiben). Alte Default-IDs für Personalisierung (gehalt/pflegegeld/de_rente/sozial/fr_rente, sowie ein Dutzend Ausgaben-IDs wie targo/canadalife/spotify/...) wurden ersetzt durch generische Beispiele (gehalt/nebenjob/sonstiges + miete/strom/internet/streaming).
+- `fc-state-v3` → `fc-state-v4`: Einführung von `state.names` (User kann Namen überschreiben). Alte Default-IDs für Personalisierung wurden ersetzt durch generische Beispiele (gehalt/nebenjob/sonstiges + miete/strom/internet/streaming).
+- **`fc-state-v4` (localStorage) → Supabase (Phase 1)**: Schema-Doku in `docs/supabase-schema.md`, SQL-Migrations in `supabase/etappe-{a,b,c}-*.sql`. Bei der Migration: frischer Start, keine Übernahme alter localStorage-Daten beschlossen.
 
 ## Hilfreiche Einstiegspunkte
 
