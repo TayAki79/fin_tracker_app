@@ -23,7 +23,7 @@ function escAttr(s) {
 }
 
 /* --- Inline Edit (Zahlungen) ---
-   rowType: "income" | "expense" | "extra"
+   rowType: "income" | "expense" | "extra-inc" | "extra-exp"
    Bearbeitet Name UND Betrag gleichzeitig. */
 function startEdit(rowEl) {
   const id = rowEl.dataset.id;
@@ -57,8 +57,10 @@ function confirmEdit(rowType, id) {
   const newName = nameInp.value.trim();
   const newAmt = parseFloat(amtInp.value);
   if (!newName || isNaN(newAmt) || newAmt < 0) return;
-  if (rowType === "extra") {
+  if (rowType === "extra-inc") {
     editExtraIncome(id, newName, newAmt);
+  } else if (rowType === "extra-exp") {
+    editExtraExpense(id, newName, newAmt);
   } else {
     const prefix = rowType === "income" ? "inc_" : "exp_";
     setName(prefix + id, newName);
@@ -103,10 +105,12 @@ function render() {
   const INCOME = getIncome();
   const EXPENSES = getExpenses();
   const extra = getExtraIncome();
+  const extraExp = getExtraExpense();
   const allIncome = [...INCOME, ...extra];
+  const allExpenses = [...EXPENSES, ...extraExp];
 
   const totalIn = allIncome.reduce((s, p) => s + p.amount, 0);
-  const totalOut = EXPENSES.reduce((s, p) => {
+  const totalOut = allExpenses.reduce((s, p) => {
     if (p.yearly) return s + p.amount / 12;
     if (p.quarterly) return s + p.amount / 3;
     return s + p.amount;
@@ -131,10 +135,12 @@ function render() {
   ib.style.background = progColor(incPct);
 
   /* Progress: Ausgaben */
-  const expPaidCount = EXPENSES.filter((p) => isExpPaid(p.id)).length;
-  const expPct = Math.round((expPaidCount / EXPENSES.length) * 100);
+  const expPaidCount = allExpenses.filter((p) => isExpPaid(p.id)).length;
+  const expPct = allExpenses.length
+    ? Math.round((expPaidCount / allExpenses.length) * 100)
+    : 0;
   document.getElementById("prog-exp-label").textContent =
-    `${expPaidCount} / ${EXPENSES.length} — ${expPct} %`;
+    `${expPaidCount} / ${allExpenses.length} — ${expPct} %`;
   const eb = document.getElementById("prog-exp-bar");
   eb.style.width = expPct + "%";
   eb.style.background = progColor(expPct);
@@ -144,7 +150,7 @@ function render() {
     .map((p) => {
       const done = isIncPaid(p.id);
       const isExtra = !INCOME.find((b) => b.id === p.id);
-      const rowType = isExtra ? "extra" : "income";
+      const rowType = isExtra ? "extra-inc" : "income";
       const delBtn = isExtra
         ? `<button class="del-btn" onclick="event.stopPropagation();delExtraIncome('${p.id}')">✕</button>`
         : "";
@@ -159,25 +165,37 @@ function render() {
     .join("");
 
   /* Ausgaben Liste */
-  document.getElementById("expense-list").innerHTML = EXPENSES.map((p) => {
-    const done = isExpPaid(p.id);
-    const dispAmt = p.yearly
-      ? p.amount / 12
-      : p.quarterly
-        ? p.amount / 3
-        : p.amount;
-    const cat = CAT[p.cat] || {
-      bg: "rgba(128,128,128,0.1)",
-      color: "var(--text2)",
-      label: p.cat,
-    };
-    const tag = `<span class="badge" style="background:${cat.bg};color:${cat.color}">${p.yearly ? "p.a." : p.quarterly ? "p.Q." : cat.label}</span>`;
-    const sub =
-      p.yearly || p.quarterly
-        ? `<div class="sub-amount">${fmt(p.amount)} ${p.yearly ? "p.a." : "p.Q."}</div>`
+  document.getElementById("expense-list").innerHTML = allExpenses
+    .map((p) => {
+      const done = isExpPaid(p.id);
+      const isExtra = !EXPENSES.find((b) => b.id === p.id);
+      const rowType = isExtra ? "extra-exp" : "expense";
+      const dispAmt = p.yearly
+        ? p.amount / 12
+        : p.quarterly
+          ? p.amount / 3
+          : p.amount;
+      const cat = isExtra
+        ? {
+            bg: "rgba(128,128,128,0.12)",
+            color: "var(--text2)",
+            label: "Extra",
+          }
+        : CAT[p.cat] || {
+            bg: "rgba(128,128,128,0.1)",
+            color: "var(--text2)",
+            label: p.cat,
+          };
+      const tag = `<span class="badge" style="background:${cat.bg};color:${cat.color}">${p.yearly ? "p.a." : p.quarterly ? "p.Q." : cat.label}</span>`;
+      const sub =
+        p.yearly || p.quarterly
+          ? `<div class="sub-amount">${fmt(p.amount)} ${p.yearly ? "p.a." : "p.Q."}</div>`
+          : "";
+      const delBtn = isExtra
+        ? `<button class="del-btn" onclick="event.stopPropagation();delExtraExpense('${p.id}')">✕</button>`
         : "";
-    return `<div class="row clickable${done ? " done" : ""}" data-id="${p.id}" data-type="expense" data-name="${escAttr(p.name)}" data-amt="${p.amount}" onclick="toggleExp('${p.id}')">
-      <div style="display:flex;align-items:center"><div class="cb${done ? " green" : ""}"></div><span class="rname">${p.name}${tag}</span></div>
+      return `<div class="row clickable${done ? " done" : ""}" data-id="${p.id}" data-type="${rowType}" data-name="${escAttr(p.name)}" data-amt="${p.amount}" onclick="toggleExp('${p.id}')">
+      <div style="display:flex;align-items:center"><div class="cb${done ? " green" : ""}"></div><span class="rname">${p.name}${tag}</span>${delBtn}</div>
       <div style="text-align:right">
         <div class="amt-wrap" style="justify-content:flex-end">
           <button class="edit-btn" onclick="event.stopPropagation();startEdit(this.closest('.row'))">✎</button>
@@ -185,7 +203,11 @@ function render() {
         </div>${sub}
       </div>
     </div>`;
-  }).join("");
+    })
+    .join("");
+
+  /* Haushalt-Monatsrechnung spiegelt Zahlungen — bei jedem Zahlungs-Re-Render mitziehen */
+  if (typeof updateHaushalt === "function") updateHaushalt();
 }
 
 /* --- Routine Tab --- */

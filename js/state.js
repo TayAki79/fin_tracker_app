@@ -39,6 +39,11 @@ function getExtraIncome() {
   return state[getKey()]?.extraIncome || [];
 }
 
+/* --- Extra Expense --- */
+function getExtraExpense() {
+  return state[getKey()]?.extraExpense || [];
+}
+
 /* --- Amounts --- */
 function getAmt(id, def) {
   return state.amounts?.[id] ?? def;
@@ -155,6 +160,36 @@ function editExtraIncome(id, newName, newAmt) {
   const k = getKey();
   if (!state[k]?.extraIncome) return;
   const item = state[k].extraIncome.find((e) => e.id === id);
+  if (!item) return;
+  item.name = newName;
+  item.amount = newAmt;
+  save();
+  render();
+}
+function addExpense() {
+  const n = document.getElementById("add-exp-name").value.trim();
+  const a = parseFloat(document.getElementById("add-exp-amt").value);
+  if (!n || isNaN(a) || a <= 0) return;
+  const k = getKey();
+  if (!state[k]) state[k] = {};
+  if (!state[k].extraExpense) state[k].extraExpense = [];
+  state[k].extraExpense.push({ id: "ee" + Date.now(), name: n, amount: a });
+  document.getElementById("add-exp-name").value = "";
+  document.getElementById("add-exp-amt").value = "";
+  save();
+  render();
+}
+function delExtraExpense(id) {
+  const k = getKey();
+  if (!state[k]?.extraExpense) return;
+  state[k].extraExpense = state[k].extraExpense.filter((e) => e.id !== id);
+  save();
+  render();
+}
+function editExtraExpense(id, newName, newAmt) {
+  const k = getKey();
+  if (!state[k]?.extraExpense) return;
+  const item = state[k].extraExpense.find((e) => e.id === id);
   if (!item) return;
   item.name = newName;
   item.amount = newAmt;

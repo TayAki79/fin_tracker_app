@@ -93,7 +93,14 @@
           <div class="prog-wrap"><div class="prog-bar" id="prog-exp-bar" style="width:0%"></div></div>
         </div>
         <div class="sec-label">Fixausgaben</div>
-        <div class="panel" id="expense-list"></div>
+        <div class="panel">
+          <div id="expense-list"></div>
+          <div class="add-expense">
+            <input id="add-exp-name" placeholder="Zusätzliche Ausgabe" />
+            <input id="add-exp-amt" placeholder="Betrag €" style="max-width:100px" type="number" step="0.01" min="0" />
+            <button onclick="addExpense()">+ Hinzufügen</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -105,52 +112,61 @@
     <p class="hint">✎ Bewege die Maus über einen Wert und klicke den Stift um ihn zu ändern.</p>
     <div class="three-col">
 
-      <!-- Vermögen -->
-      <div>
-        <div class="summary-box">
-          <h3>Vermögen</h3>
-          <div class="srow"><span>Aktien-Depot</span><div class="sval"><span style="color:var(--green)" id="hv-aktien">0,00 €</span><button class="edit-btn" onclick="editHaushalt('aktien',1000,'Aktien-Depot')">✎</button></div></div>
-          <div class="srow"><span>Krypto</span><div class="sval"><span style="color:var(--green)" id="hv-krypto">0,00 €</span><button class="edit-btn" onclick="editHaushalt('krypto',500,'Krypto')">✎</button></div></div>
-          <div class="srow"><span>Tagesgeld</span><div class="sval"><span style="color:var(--green)" id="hv-tg">0,00 €</span><button class="edit-btn" onclick="editHaushalt('tg',500,'Tagesgeld')">✎</button></div></div>
-          <div class="srow"><span>Girokonto</span><div class="sval"><span style="color:var(--green)" id="hv-giro">0,00 €</span><button class="edit-btn" onclick="editHaushalt('giro',200,'Girokonto')">✎</button></div></div>
-          <div class="srow"><span>Bargeld</span><div class="sval"><span style="color:var(--green)" id="hv-bar">0,00 €</span><button class="edit-btn" onclick="editHaushalt('bar',300,'Bargeld')">✎</button></div></div>
-          <div class="srow"><span>Kredit</span><div class="sval"><span style="color:var(--red)" id="hv-kredit">0,00 €</span><button class="edit-btn" onclick="editHaushalt('kredit',0,'Kredit (Restschuld)')">✎</button></div></div>
-          <div class="srow total"><span>Nettovermögen</span><span style="color:var(--amber)" id="hv-netto">0,00 €</span></div>
-        </div>
+      <!-- Row 1 · Col 1: Vermögen -->
+      <div class="summary-box" id="box-vermogen">
+        <h3 onclick="toggleHaushaltBox('box-vermogen')">Vermögen</h3>
+        <div class="srow"><span>Aktien-Depot</span><div class="sval"><button class="edit-btn" onclick="editHaushalt('aktien',1000,'Aktien-Depot')">✎</button><span style="color:var(--green)" id="hv-aktien">0,00 €</span></div></div>
+        <div class="srow"><span>Krypto</span><div class="sval"><button class="edit-btn" onclick="editHaushalt('krypto',500,'Krypto')">✎</button><span style="color:var(--green)" id="hv-krypto">0,00 €</span></div></div>
+        <div class="srow"><span>Tagesgeld</span><div class="sval"><button class="edit-btn" onclick="editHaushalt('tg',500,'Tagesgeld')">✎</button><span style="color:var(--green)" id="hv-tg">0,00 €</span></div></div>
+        <div class="srow"><span>Girokonto</span><div class="sval"><button class="edit-btn" onclick="editHaushalt('giro',200,'Girokonto')">✎</button><span style="color:var(--green)" id="hv-giro">0,00 €</span></div></div>
+        <div class="srow"><span>Bargeld</span><div class="sval"><button class="edit-btn" onclick="editHaushalt('bar',300,'Bargeld')">✎</button><span style="color:var(--green)" id="hv-bar">0,00 €</span></div></div>
+        <div class="srow total"><span>Nettovermögen</span><span style="color:var(--amber)" id="hv-netto">0,00 €</span></div>
       </div>
 
-      <!-- Monatsrechnung -->
-      <div>
-        <div class="summary-box">
-          <h3>Monatsrechnung</h3>
-          <div class="srow"><span>Gehalt</span><div class="sval"><span style="color:var(--green)" id="hv-gehalt">0,00 €</span><button class="edit-btn" onclick="editHaushalt('gehalt',2000,'Gehalt')">✎</button></div></div>
-          <div class="srow"><span>Nebeneinkommen</span><div class="sval"><span style="color:var(--green)" id="hv-nebenein">0,00 €</span><button class="edit-btn" onclick="editHaushalt('nebenein',300,'Nebeneinkommen')">✎</button></div></div>
-          <div class="srow total"><span>Gesamteinnahmen</span><span style="color:var(--green)" id="hv-gesamt-in">0,00 €</span></div>
-          <div class="srow" style="margin-top:8px"><span>Fixkosten (∅)</span><div class="sval"><span style="color:var(--red)" id="hv-fixkosten">0,00 €</span><button class="edit-btn" onclick="editHaushalt('fixkosten',1000,'Fixkosten ∅')">✎</button></div></div>
-          <div class="srow"><span>Sparpläne</span><div class="sval"><span style="color:var(--text2)" id="hv-spar">0,00 €</span><button class="edit-btn" onclick="editHaushalt('spar',200,'Sparpläne')">✎</button></div></div>
-          <div class="srow"><span>Variables Budget</span><div class="sval"><span style="color:var(--text2)" id="hv-var">0,00 €</span><button class="edit-btn" onclick="editHaushalt('var',500,'Variables Budget')">✎</button></div></div>
-          <div class="srow total"><span>Überschuss</span><span style="color:var(--green)" id="hv-ueberschuss">0,00 €</span></div>
-        </div>
+      <!-- Row 1 · Col 2: Monatsrechnung -->
+      <div class="summary-box" id="box-monat">
+        <h3 onclick="toggleHaushaltBox('box-monat')">Monatsrechnung</h3>
+        <div class="sec-mini">Einnahmen</div>
+        <div id="hh-monat-in"></div>
+        <div class="srow total"><span>Gesamteinnahmen</span><span style="color:var(--green)" id="hv-gesamt-in">0,00 €</span></div>
+        <div class="sec-mini" style="margin-top:14px">Ausgaben</div>
+        <div class="srow"><span>Fixkosten (∅)</span><span style="color:var(--red)" id="hv-fixkosten">0,00 €</span></div>
+        <div class="srow"><span>Variable Kosten</span><div class="sval"><button class="edit-btn" onclick="editHaushalt('var',500,'Variable Kosten')">✎</button><span style="color:var(--red)" id="hv-var">0,00 €</span></div></div>
+        <div class="srow"><span>Sparpläne</span><div class="sval"><button class="edit-btn" onclick="editHaushalt('spar',200,'Sparpläne')">✎</button><span style="color:var(--red)" id="hv-spar">0,00 €</span></div></div>
+        <div class="srow total"><span>Gesamtausgaben</span><span style="color:var(--red)" id="hv-gesamt-out">0,00 €</span></div>
+        <div class="srow total"><span>Überschuss</span><span style="color:var(--green)" id="hv-ueberschuss">0,00 €</span></div>
       </div>
 
-      <!-- Barreserve & Kredit -->
-      <div>
-        <div class="summary-box">
-          <h3>Barreserve</h3>
-          <div class="srow"><span>Aktuell</span><div class="sval"><span id="hv-bar2">0,00 €</span><button class="edit-btn" onclick="editHaushalt('bar',300,'Bargeld')">✎</button></div></div>
-          <div class="srow"><span>Geplante Ausgabe</span><div class="sval"><span style="color:var(--red)" id="hv-urlaub">0,00 €</span><button class="edit-btn" onclick="editHaushalt('urlaub',0,'Geplante Ausgabe')">✎</button></div></div>
-          <div class="srow"><span>Nach Ausgabe</span><span style="color:var(--amber)" id="hv-nach-urlaub">0,00 €</span></div>
-          <div class="srow"><span>Ziel</span><div class="sval"><span id="hv-bar-ziel">0,00 €</span><button class="edit-btn" onclick="editHaushalt('bar-ziel',5000,'Barreserve Ziel')">✎</button></div></div>
-          <div class="srow"><span>Fehlbetrag</span><span style="color:var(--red)" id="hv-fehl">0,00 €</span></div>
-          <div class="srow"><span>Sparrate</span><div class="sval"><span id="hv-sparrate">0,00 €</span><button class="edit-btn" onclick="editHaushalt('sparrate',100,'Monatliche Sparrate')">✎</button></div></div>
-          <div class="srow total"><span id="hv-monate-label">Ziel erreicht!</span><span style="color:var(--amber)" id="hv-ziel-arrow">→ 0,00 €</span></div>
-        </div>
-        <div class="summary-box">
-          <h3>Kredit</h3>
-          <div class="srow"><span>Restschuld</span><div class="sval"><span style="color:var(--red)" id="hv-kredit2">0,00 €</span><button class="edit-btn" onclick="editHaushalt('kredit',0,'Restschuld')">✎</button></div></div>
-          <div class="srow"><span>Rate</span><div class="sval"><span style="color:var(--red)" id="hv-rate">0,00 €/Monat</span><button class="edit-btn" onclick="editHaushalt('rate',0,'Monatliche Rate')">✎</button></div></div>
-          <div class="srow"><span>Zins (p.a.)</span><div class="sval"><span style="color:var(--red)" id="hv-zins">0,00 %</span><button class="edit-btn" onclick="editHaushalt('zins',0,'Zins p.a. (in %)')">✎</button></div></div>
-        </div>
+      <!-- Row 1 · Col 3: Kredit -->
+      <div class="summary-box" id="box-kredit">
+        <h3 onclick="toggleHaushaltBox('box-kredit')">Kredit</h3>
+        <div class="srow"><span>Restschuld</span><div class="sval"><button class="edit-btn" onclick="editHaushalt('kredit',0,'Restschuld')">✎</button><span style="color:var(--red)" id="hv-kredit2">0,00 €</span></div></div>
+        <div class="srow"><span>Rate</span><div class="sval"><button class="edit-btn" onclick="editHaushalt('rate',0,'Monatliche Rate')">✎</button><span style="color:var(--red)" id="hv-rate">0,00 €/Monat</span></div></div>
+        <div class="srow"><span>Zins (p.a.)</span><div class="sval"><button class="edit-btn" onclick="editHaushalt('zins',0,'Zins p.a. (in %)')">✎</button><span style="color:var(--red)" id="hv-zins">0,00 %</span></div></div>
+      </div>
+
+      <!-- Row 2 · Col 1: Ziel Barreserve -->
+      <div class="summary-box" id="box-barreserve">
+        <h3 onclick="toggleHaushaltBox('box-barreserve')">Ziel Barreserve</h3>
+        <div class="srow"><span>Aktuell</span><div class="sval"><button class="edit-btn" onclick="editHaushalt('bar',300,'Bargeld')">✎</button><span id="hv-bar2">0,00 €</span></div></div>
+        <div class="srow"><span>Geplante Ausgabe</span><div class="sval"><button class="edit-btn" onclick="editHaushalt('urlaub',0,'Geplante Ausgabe')">✎</button><span style="color:var(--red)" id="hv-urlaub">0,00 €</span></div></div>
+        <div class="srow"><span>Nach Ausgabe</span><span style="color:var(--amber)" id="hv-nach-urlaub">0,00 €</span></div>
+        <div class="srow"><span>Ziel</span><div class="sval"><button class="edit-btn" onclick="editHaushalt('bar-ziel',5000,'Barreserve Ziel')">✎</button><span id="hv-bar-ziel">0,00 €</span></div></div>
+        <div class="srow"><span>Fehlbetrag</span><span style="color:var(--red)" id="hv-fehl">0,00 €</span></div>
+        <div class="srow"><span>Sparrate</span><div class="sval"><button class="edit-btn" onclick="editHaushalt('sparrate',100,'Monatliche Sparrate')">✎</button><span id="hv-sparrate">0,00 €</span></div></div>
+        <div class="srow total"><span id="hv-monate-label">Ziel erreicht!</span><span style="color:var(--amber)" id="hv-ziel-arrow">→ 0,00 €</span></div>
+      </div>
+
+      <!-- Row 2 · Col 2: Ziel Notfallkonto -->
+      <div class="summary-box" id="box-notfall">
+        <h3 onclick="toggleHaushaltBox('box-notfall')">Ziel Notfallkonto</h3>
+        <div class="srow"><span>Aktuell</span><div class="sval"><button class="edit-btn" onclick="editHaushalt('nf-aktuell',0,'Notfallkonto aktuell')">✎</button><span style="color:var(--green)" id="hv-nf-aktuell">0,00 €</span></div></div>
+        <div class="srow"><span>Geplante Ausgabe</span><div class="sval"><button class="edit-btn" onclick="editHaushalt('nf-ausgabe',0,'Geplante Ausgabe')">✎</button><span style="color:var(--red)" id="hv-nf-ausgabe">0,00 €</span></div></div>
+        <div class="srow"><span>Nach Ausgabe</span><span style="color:var(--amber)" id="hv-nf-nach-ausgabe">0,00 €</span></div>
+        <div class="srow"><span>Ziel</span><div class="sval"><button class="edit-btn" onclick="editHaushalt('nf-ziel',5000,'Notfallkonto Ziel')">✎</button><span id="hv-nf-ziel">0,00 €</span></div></div>
+        <div class="srow"><span>Fehlbetrag</span><span style="color:var(--red)" id="hv-nf-fehl">0,00 €</span></div>
+        <div class="srow"><span>Sparrate</span><div class="sval"><button class="edit-btn" onclick="editHaushalt('nf-sparrate',100,'Monatliche Sparrate')">✎</button><span id="hv-nf-sparrate">0,00 €</span></div></div>
+        <div class="srow total"><span id="hv-nf-monate-label">Ziel erreicht!</span><span style="color:var(--amber)" id="hv-nf-ziel-arrow">→ 0,00 €</span></div>
       </div>
 
     </div>
@@ -215,7 +231,8 @@
           <div class="srow"><span>Abgehakte Einnahmen &amp; Kosten</span><span style="color:var(--green)">✓</span></div>
           <div class="srow"><span>Angepasste Beträge</span><span style="color:var(--green)">✓</span></div>
           <div class="srow"><span>Erledigte Monatsroutine</span><span style="color:var(--green)">✓</span></div>
-          <div class="srow"><span>Extra-Einnahmen</span><span style="color:var(--green)">✓</span></div>
+          <div class="srow"><span>Extra-Einnahmen &amp; -Ausgaben</span><span style="color:var(--green)">✓</span></div>
+          <div class="srow"><span>Ziel Barreserve &amp; Notfallkonto</span><span style="color:var(--green)">✓</span></div>
           <div class="srow"><span>Finanztipps-Status</span><span style="color:var(--green)">✓</span></div>
           <div class="srow"><span>Dark / Light Mode</span><span style="color:var(--green)">✓</span></div>
           <div class="srow"><span>Kumulierter Überschuss</span><span style="color:var(--green)">✓</span></div>

@@ -44,7 +44,7 @@ data → state → render → haushalt → app
 | Tab | Inhalt |
 |-----|--------|
 | **Zahlungen** | Einnahmen + Fixausgaben pro Monat abhaken, Beträge & Namen inline editierbar, Extra-Einnahmen hinzufügbar, Fortschrittsbalken, kumulierter Überschuss |
-| **Haushalt** | Vermögensübersicht, Monatsbilanz, Barreserven-Ziel, Kredit |
+| **Haushalt** | 3×n Grid mit klappbaren Boxen: Vermögen, Monatsrechnung (sync mit Zahlungen), Kredit · Ziel Barreserve, Ziel Notfallkonto |
 | **Routine** | Monatscheckliste (Generic, 7 Punkte) |
 | **Finanztipps** | Allgemeine Empfehlungen, annehmbar/verwerfbar, Archiv |
 | **Sicherung** | Export/Import als JSON-Backup |
@@ -58,6 +58,7 @@ Alles im `localStorage`:
 | `fc-state-v4` | Hauptzustand (siehe unten) |
 | `fc-theme` | `"dark"` oder `"light"` |
 | `fc-last-export` | Zeitstempel des letzten Exports |
+| `fc-collapsed` | UI-Zustand der klappbaren Haushalt-Boxen (`{"box-vermogen":true,...}`) |
 
 ### State-Struktur (`fc-state-v4`)
 
@@ -79,6 +80,9 @@ Alles im `localStorage`:
     routine: { "r1": true, ... },
     extraIncome: [
       { id: "ei1234567890", name: "Bonus", amount: 500 }
+    ],
+    extraExpense: [
+      { id: "ee1234567890", name: "Reparatur", amount: 120 }
     ]
   },
   surplusEntries: {               // Kumulierter Überschuss pro Monat
@@ -136,6 +140,6 @@ Es gibt keinen npm-Workflow.
 
 - Neue Einnahmenkategorie hinzufügen: `data.js` → `INCOME_BASE_DEF`
 - Neue Ausgabenkategorie: `data.js` → `EXPENSES_DEF` (mit `cat:` aus `CAT`)
-- Berechnung Überschuss anpassen: `js/haushalt.js` → `updateHaushalt()`
+- Berechnung Überschuss anpassen: `js/haushalt.js` → `updateHaushalt()` (Monatsrechnung-Posten werden aus `getIncome()`/`getExpenses()` + Extras gespiegelt, plus Haushalt-eigene `hh_spar` & `hh_var`)
 - Neuen Tab hinzufügen: `<div class="tab" onclick="showTab('name',this)">` im Topnav + `<div id="tab-name" class="page">` im Container
 - Theme-Farbe ändern: `css/base.css` → `:root` bzw. `[data-theme="light"]`
