@@ -18,7 +18,8 @@
      ============================================================ -->
 <div id="auth-loading">
   <div class="auth-loading-dot"></div>
-  <div class="auth-loading-label">Verbinde …</div>
+  <div class="auth-loading-label" id="auth-loading-label">Verbinde …</div>
+  <div class="auth-loading-hint" id="auth-loading-hint" style="display:none">Server wacht auf — kann bis zu einer Minute dauern</div>
 </div>
 
 <!-- ============================================================
@@ -144,9 +145,6 @@
       <span id="user-email"></span>
     </span>
     <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
-    <button class="io-btn btn-export" onclick="exportData()">Export</button>
-    <button class="io-btn btn-import" onclick="document.getElementById('importFile').click()">Import</button>
-    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
     <button class="io-btn btn-logout" id="logoutBtn">Abmelden</button>
   </div>
 </div>
@@ -165,7 +163,6 @@
       <div class="tab" onclick="showTab('haushalt',this)">Haushalt</div>
       <div class="tab" onclick="showTab('routine',this)">Routine</div>
       <div class="tab" onclick="showTab('tipps',this)">Finanztipps</div>
-      <div class="tab" onclick="showTab('backup',this)">Sicherung</div>
     </div>
     <div class="month-sel">
       <select id="selMonth"></select>
@@ -324,39 +321,6 @@
     </div>
     <div class="archive-body" id="archive-body"></div>
     <div class="info-footer">Weitere Fragen? Öffne Claude.ai — ich bin dein persönlicher Finanzberater.</div>
-  </div>
-
-  <!-- ============================================================
-       TAB: SICHERUNG
-       ============================================================ -->
-  <div id="tab-backup" class="page">
-    <div class="two-col">
-      <div>
-        <div class="backup-info">
-          <strong>Export</strong> — speichert alle Eintragungen und angepassten Beträge als <code>.json</code> Datei.<br><br>
-          <strong>Import</strong> — stellt deinen Stand vollständig wieder her.<br><br>
-          <strong>Empfehlung:</strong> Immer vor einem HTML-Update exportieren.
-          <div class="last-export" id="last-export-info">Noch kein Export gespeichert.</div>
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="big-btn" onclick="exportData()" style="border-color:var(--accent);color:var(--accent);">↓ Exportieren</button>
-          <button class="big-btn" onclick="document.getElementById('importFile').click()" style="border-color:var(--yellow);color:var(--yellow);">↑ Importieren</button>
-        </div>
-      </div>
-      <div>
-        <div class="summary-box">
-          <h3>Was wird gespeichert</h3>
-          <div class="srow"><span>Abgehakte Einnahmen &amp; Kosten</span><span style="color:var(--green)">✓</span></div>
-          <div class="srow"><span>Angepasste Beträge</span><span style="color:var(--green)">✓</span></div>
-          <div class="srow"><span>Erledigte Monatsroutine</span><span style="color:var(--green)">✓</span></div>
-          <div class="srow"><span>Extra-Einnahmen &amp; -Ausgaben</span><span style="color:var(--green)">✓</span></div>
-          <div class="srow"><span>Ziel Barreserve &amp; Notfallkonto</span><span style="color:var(--green)">✓</span></div>
-          <div class="srow"><span>Finanztipps-Status</span><span style="color:var(--green)">✓</span></div>
-          <div class="srow"><span>Dark / Light Mode</span><span style="color:var(--green)">✓</span></div>
-          <div class="srow"><span>Kumulierter Überschuss</span><span style="color:var(--green)">✓</span></div>
-        </div>
-      </div>
-    </div>
   </div>
 
 </div><!-- /container -->

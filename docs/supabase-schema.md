@@ -178,17 +178,18 @@ Häkchen, Notizfeld, kumulierter Überschuss. Wird **lazy** angelegt — erst be
 
 ```sql
 CREATE TABLE public.monthly_states (
-  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id         uuid NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
-  year            int NOT NULL CHECK (year BETWEEN 2000 AND 2200),
-  month           int NOT NULL CHECK (month BETWEEN 0 AND 11),
-  income_paid     jsonb NOT NULL DEFAULT '{}'::jsonb,   -- { "<position_id>": true }
-  expense_paid    jsonb NOT NULL DEFAULT '{}'::jsonb,
-  routine_done    jsonb NOT NULL DEFAULT '{}'::jsonb,
-  surplus_actual  numeric(12,2),                         -- user-eingetragener kumulierter Überschuss
-  note            text,                                  -- Phase 2: Monatsnotiz
-  created_at      timestamptz NOT NULL DEFAULT NOW(),
-  updated_at      timestamptz NOT NULL DEFAULT NOW(),
+  id                  uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id             uuid NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  year                int NOT NULL CHECK (year BETWEEN 2000 AND 2200),
+  month               int NOT NULL CHECK (month BETWEEN 0 AND 11),
+  income_paid         jsonb NOT NULL DEFAULT '{}'::jsonb,   -- { "<position_id>": true }
+  expense_paid        jsonb NOT NULL DEFAULT '{}'::jsonb,
+  routine_done        jsonb NOT NULL DEFAULT '{}'::jsonb,
+  surplus_actual      numeric(12,2),                         -- user-eingetragener kumulierter Überschuss
+  positions_snapshot  jsonb NOT NULL DEFAULT '{}'::jsonb,    -- eingefrorene Beträge/Namen, siehe Etappe D
+  note                text,                                  -- Phase 2: Monatsnotiz
+  created_at          timestamptz NOT NULL DEFAULT NOW(),
+  updated_at          timestamptz NOT NULL DEFAULT NOW(),
   UNIQUE (user_id, year, month)
 );
 
@@ -457,6 +458,7 @@ Im SQL Editor nacheinander:
 2. Section **3.2–3.10** — Tabellen + Indexe + Trigger
 3. Section **4** — RLS aktivieren + Policies
 4. Section **5** — Signup-Bootstrap-Funktion + Trigger
+5. `supabase/etappe-d-positions-snapshot.sql` — `positions_snapshot`-Spalte in `monthly_states` (nachträglich hinzugefügt, siehe 3.7)
 
 **Reihenfolge ist wichtig** — Children-Tabellen brauchen `profiles` zuerst, RLS braucht die Tabellen, der Bootstrap-Trigger braucht alle Tabellen.
 

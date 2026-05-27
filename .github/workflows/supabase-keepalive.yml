@@ -1,0 +1,41 @@
+name: Supabase Keep-Alive
+
+# Pingt unser Supabase-Projekt alle 4 Stunden, damit es nicht in den
+# Free-Tier-Schlaf rutscht (pausiert nach 7 Tagen Inaktivität → 30–60s
+# Cold-Start beim ersten Request). Mit diesem Cron wacht es nie auf,
+# weil es nie einschläft.
+
+on:
+  schedule:
+    # alle 4 Stunden um :23 (kein voller Stundenstart → kleinere Warteschlange bei GitHub Actions)
+    - cron: "23 */4 * * *"
+  workflow_dispatch: # manueller Trigger zum Testen
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping Supabase REST
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::error::SUPABASE_URL oder SUPABASE_ANON_KEY Secret fehlt"
+            exit 1
+          fi
+          # Anfrage gegen eine reale Tabelle — RLS gibt für anonyme
+          # Aufrufer leeres Array zurück, der Query läuft aber durch
+          # Postgres → zählt als Datenbank-Aktivität.
+          STATUS=$(curl --silent --output /dev/null --write-out "%{http_code}" \
+            "$SUPABASE_URL/rest/v1/profiles?select=id&limit=1" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY")
+          echo "HTTP $STATUS"
+          # 200 = ok, 401 = ok (RLS hat geblockt aber Query lief), beides hält warm
+          if [ "$STATUS" = "200" ] || [ "$STATUS" = "401" ]; then
+            exit 0
+          fi
+          echo "::error::Unerwarteter Status $STATUS"
+          exit 1

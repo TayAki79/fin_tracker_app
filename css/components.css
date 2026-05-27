@@ -911,51 +911,6 @@
 }
 .sval .edit-btn { opacity: 0; }
 
-/* --- Backup --- */
-.backup-info {
-  background: transparent;
-  border: none;
-  border-left: 2px solid var(--accent);
-  border-radius: 0;
-  padding: 4px 0 4px 28px;
-  margin-bottom: 28px;
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 18px;
-  font-weight: 400;
-  color: var(--text);
-  line-height: 1.55;
-  letter-spacing: -0.005em;
-}
-.backup-info strong {
-  font-family: var(--font-body);
-  font-style: normal;
-  color: var(--ink);
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  font-size: 11px;
-}
-.backup-info code {
-  font-family: var(--font-mono);
-  font-style: normal;
-  font-size: 13px;
-  background: var(--bg-tint);
-  padding: 1px 6px;
-  border-radius: 0;
-  color: var(--accent);
-  font-weight: 500;
-}
-.last-export {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--text3);
-  margin-top: 18px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  font-style: normal;
-}
-
 /* ============================================================
    AUTH-GATE — Loading-State, Login/Register/Reset-Screens
    ============================================================ */
@@ -1005,6 +960,16 @@ body:not(.fc-auth-signed-in) .btn-logout { display: none; }
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--text3);
+}
+.auth-loading-hint {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--text3);
+  max-width: 280px;
+  text-align: center;
+  margin-top: 8px;
+  animation: ledger-fade 600ms var(--ease) both;
 }
 @keyframes auth-pulse {
   0%, 100% { transform: scale(1);   opacity: 1;   }
@@ -1202,6 +1167,24 @@ body:not(.fc-auth-signed-in) .btn-logout { display: none; }
   display: none;
 }
 .auth-error.visible { display: block; }
+.auth-error-retry {
+  display: inline-block;
+  margin-left: 10px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border: var(--hair) solid var(--red);
+  background: transparent;
+  color: var(--red);
+  cursor: pointer;
+  transition: background 200ms var(--ease);
+}
+.auth-error-retry:hover {
+  background: color-mix(in srgb, var(--red) 10%, transparent);
+}
 
 .auth-message {
   border-left: 2px solid var(--accent);

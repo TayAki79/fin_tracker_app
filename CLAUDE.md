@@ -1,13 +1,13 @@
 # Finanz-Cockpit
 
-Finanz-Tracker (auf Deutsch). **In Migration vom Personal-Tool zur Multi-User-SaaS.** Aktueller Zustand: Vanilla-Frontend + Supabase-Backend (Phase 1).
+Finanz-Tracker (auf Deutsch). **Multi-User-SaaS in Phase 1.** Aktueller Zustand: Vanilla-Frontend + Supabase-Backend (Auth + Daten).
 
 ## Tech Stack
 
 - **HTML + CSS + Vanilla JavaScript** — kein Build, keine npm-Dependencies
-- **Supabase** (Postgres + Auth + Storage, EU-Region Frankfurt) als Backend — siehe `docs/supabase-schema.md`
+- **Supabase** (Postgres + Auth, EU-Region Frankfurt) — Schema-Doku in `docs/supabase-schema.md`, SQL in `supabase/`
 - **Google Fonts** (Fraunces, Bricolage Grotesque, JetBrains Mono) via CDN
-- **Supabase JS Client** via ESM-CDN (`https://esm.sh/@supabase/supabase-js@2`) — einziges Modul-Script
+- **Supabase JS Client** via ESM-CDN (`https://esm.sh/@supabase/supabase-js@2`) — die einzigen Modul-Scripte
 
 Vanilla bleibt — solange es trägt. Build-Step wird eingeführt, wenn die Komplexität es zwingt.
 
@@ -21,139 +21,137 @@ python -m http.server 8765
 # dann http://localhost:8765 öffnen
 ```
 
-Vor erstem Start: `js/config.example.js` nach `js/config.js` kopieren und Supabase-Credentials eintragen (siehe Kommentare in der Datei). `js/config.js` ist gitignored.
+Vor erstem Start: `js/config.example.js` nach `js/config.js` kopieren und Supabase-Credentials eintragen. `js/config.js` ist gitignored.
 
 ## Projektstruktur
 
 ```
 fin_tracker_web/
-├── index.html              # Einzige HTML-Datei, enthält alle 5 Tabs
+├── index.html              # Einzige HTML-Datei, enthält Auth-Gate + alle 4 Tabs
 ├── assets/
 │   └── logo.svg            # (aktuell per CSS ausgeblendet)
 ├── css/
 │   ├── base.css            # CSS-Variablen, Themes, Typografie, Atmosphäre
 │   ├── layout.css          # Topbar, Container, Grids, Tabs, Navigation
-│   └── components.css      # Buttons, Panels, Rows, Inputs, alle UI-Elemente
+│   └── components.css      # Buttons, Panels, Rows, Inputs, Auth-Gate, alle UI-Elemente
 ├── docs/
 │   └── supabase-schema.md  # Datenbankschema-Doku (lesbar, mit SQL)
 ├── supabase/
-│   ├── etappe-a-tables.sql # Tabellen + Indexe + Trigger
-│   ├── etappe-b-rls.sql    # Row-Level-Security-Policies
-│   └── etappe-c-bootstrap.sql # Signup-Trigger (Auto-Bootstrap neuer User)
+│   ├── etappe-a-tables.sql            # Tabellen + Indexe + Trigger
+│   ├── etappe-b-rls.sql               # Row-Level-Security-Policies
+│   ├── etappe-c-bootstrap.sql         # Signup-Trigger (Auto-Bootstrap neuer User)
+│   └── etappe-d-positions-snapshot.sql # positions_snapshot-Spalte für monthly_states
 └── js/                     # Reihenfolge in index.html ist KRITISCH
-    ├── data.js             # Statische Defaults (INCOME_BASE_DEF, EXPENSES_DEF, ROUTINE_ITEMS, TIPS_DATA, CAT)
-    ├── state.js            # localStorage-Abstraktion (STORAGE_KEY = "fc-state-v4") — wird in Phase 1 durch Supabase ersetzt
+    ├── data.js             # Statische Inhalte (MONTHS, TIPS_DATA, CAT)
+    ├── state.js            # Supabase-backed In-Memory-Cache (window.stateBootstrap/Teardown)
     ├── render.js           # DOM-Rendering für Zahlungen, Routine, Tipps
     ├── haushalt.js         # Haushalt-Tab: Vermögen, Monatsrechnung, Barreserve, Kredit
     ├── app.js              # Init, Theme-Toggle, Tab-Switching, Datum, Issue-Nummer
     ├── config.example.js   # Vorlage für Supabase-Credentials (committed)
     ├── config.js           # echte Credentials — GITIGNORED
-    └── supabase-client.js  # ES-Modul: erzeugt window.supabase
+    ├── supabase-client.js  # ES-Modul: erzeugt window.supabase
+    └── auth.js             # ES-Modul: Auth-Gate-Logik (Login/Register/Reset) + Bootstrap-Trigger
 ```
 
 ## Script-Reihenfolge
 
-Die JS-Dateien werden in dieser Reihenfolge geladen (siehe `index.html`):
-
+```html
+<script src="js/data.js"></script>
+<script src="js/state.js"></script>
+<script src="js/render.js"></script>
+<script src="js/haushalt.js"></script>
+<script src="js/app.js"></script>
+<script type="module" src="js/supabase-client.js"></script>
+<script type="module" src="js/auth.js"></script>
 ```
-data → state → render → haushalt → app
-```
 
-**Warum das wichtig ist:** alle Funktionen sind globale Funktionen am `window`-Objekt (kein Module-System). Jede Datei darf nur auf Identifier aus zuvor geladenen Dateien zugreifen. Bei Änderungen niemals die Reihenfolge ändern, ohne die Abhängigkeiten zu prüfen.
+Die fünf non-module Skripte definieren Funktionen am `window`-Objekt. Die beiden ES-Module laufen deferred danach. `auth.js` ruft nach erfolgreichem Login `window.stateBootstrap(userId)` auf, lädt damit alle Cache-Daten aus Supabase, und triggert dann `window.fcRenderAll()`. Vor dem Bootstrap wird **nichts** gerendert — die App-DOM bleibt durch die `body.fc-auth-loading`/`fc-auth-signed-out` CSS-Regeln versteckt.
 
-## Die fünf Tabs
+## Die vier Tabs
 
 | Tab | Inhalt |
 |-----|--------|
 | **Zahlungen** | Einnahmen + Fixausgaben pro Monat abhaken, Beträge & Namen inline editierbar, Extra-Einnahmen hinzufügbar, Fortschrittsbalken, kumulierter Überschuss |
 | **Haushalt** | 3×n Grid mit klappbaren Boxen: Vermögen, Monatsrechnung (sync mit Zahlungen), Kredit · Ziel Barreserve, Ziel Notfallkonto |
-| **Routine** | Monatscheckliste (Generic, 7 Punkte) |
-| **Finanztipps** | Allgemeine Empfehlungen, annehmbar/verwerfbar, Archiv |
-| **Sicherung** | Export/Import als JSON-Backup |
+| **Routine** | Monatscheckliste (per User, default 7 Punkte aus dem Signup-Bootstrap) |
+| **Finanztipps** | Allgemeine Empfehlungen (statisch in `data.js → TIPS_DATA`), annehmbar/verwerfbar, Archiv |
 
-## Persistenz
+## Datenfluss & Persistenz
 
-Alles im `localStorage`:
+**Quelle der Wahrheit ist Supabase.** Frontend hält einen In-Memory-Cache (`_cache` in `state.js`), der bei Login aus Supabase befüllt und bei Logout geleert wird.
+
+| Tabelle | Wozu |
+|---|---|
+| `profiles` | Pro-User-Metadaten (tier, locale) |
+| `household` | 1:1, alle Vermögens-/Sparpläne-/Ziel-Beträge (`aktien`, `bar_ziel`, …) |
+| `user_preferences` | 1:1, theme + collapsed_boxes (parallel auch in localStorage für Pre-Login-Theme) |
+| `positions` | Wiederkehrende Einnahmen/Ausgaben (kind, name, amount, category, …); seed-Defaults aus Bootstrap |
+| `one_off_entries` | Pro-Monat-Extras (kind, year, month, name, amount) |
+| `monthly_states` | Pro-Monat-Häkchen + surplus_actual + `positions_snapshot` (eingefrorener Stand bei Erstanlage) |
+| `routines` | Pro-User-Routine-Items |
+| `tips_state` | Pro-User-Status pro Tipp (`dismissed` oder `accepted`; "neutral" = keine Zeile) |
+
+### `positions_snapshot` (in `monthly_states`)
+
+Beim ersten Schreiben in einen Monat wird ein Schnappschuss der aktuellen Positionen (Namen + Beträge) als `jsonb` in der Zeile mitgespeichert. Damit kann ein historischer Monat später korrekt rekonstruiert werden, auch wenn der User die Beträge in `positions` inzwischen geändert hat. Die UI nutzt das noch nicht — der Snapshot wird vorerst nur erfasst.
+
+### Was im localStorage bleibt (per-Device-UI-State)
 
 | Key | Inhalt |
-|-----|--------|
-| `fc-state-v4` | Hauptzustand (siehe unten) |
-| `fc-theme` | `"dark"` oder `"light"` |
-| `fc-last-export` | Zeitstempel des letzten Exports |
-| `fc-collapsed` | UI-Zustand der klappbaren Haushalt-Boxen (`{"box-vermogen":true,...}`) |
+|---|---|
+| `fc-theme` | `"dark"` / `"light"` — sofortiges Theme-Match vor Login |
+| `fc-collapsed` | Klapp-Zustand der Haushalt-Boxen pro Browser |
 
-### State-Struktur (`fc-state-v4`)
+Diese werden absichtlich nicht (sofort) auf `user_preferences` synchronisiert — beides ist Device-spezifisch.
 
-```js
-{
-  amounts: {                      // Globale Beträge (über alle Monate)
-    "inc_gehalt": 2000,
-    "exp_miete": 800,
-    "hh_aktien": 1000,
-    ...
-  },
-  names: {                        // User-überschriebene Bezeichnungen
-    "inc_gehalt": "Mein Gehalt",
-    ...
-  },
-  "2026-4": {                     // Pro Monat-Jahr (Key = "YYYY-M", 0-indexiert)
-    incPaid: { "gehalt": true, ... },
-    expPaid: { "miete": true, ... },
-    routine: { "r1": true, ... },
-    extraIncome: [
-      { id: "ei1234567890", name: "Bonus", amount: 500 }
-    ],
-    extraExpense: [
-      { id: "ee1234567890", name: "Reparatur", amount: 120 }
-    ]
-  },
-  surplusEntries: {               // Kumulierter Überschuss pro Monat
-    "2026-4": 350.50,
-    ...
-  },
-  tipsDismissed: { "t1": true, ... },
-  tipsAccepted:  { "t2": true, ... }
-}
-```
+## state.js — wichtige Funktionen
 
-### Export-Format
+| Funktion | Zweck |
+|---|---|
+| `stateBootstrap(userId)` | Lädt Household, Preferences, Positions, Routines, Monthly States, One-Off Entries, Tips State parallel. |
+| `stateTeardown()` | Cache leeren (bei Logout). |
+| `stateIsReady()` | Bool — `true` nach erfolgreichem Bootstrap. |
+| `getIncome()` / `getExpenses()` | Positionen aus dem Cache, in der von `render.js` erwarteten Form. |
+| `getExtraIncome()` / `getExtraExpense()` | One-off-Einträge für den aktuell selektierten Monat. |
+| `getRoutines()` | Routine-Items aus dem Cache. |
+| `getAmt(id, def)` / `setAmt(id, val)` | Generischer Zugriff: `hh_*` → household-Spalten, `inc_/exp_*` → position-Felder. |
+| `getName(id, def)` / `setName(id, val)` | Position-Name lesen/schreiben. |
+| `getSurplus/getKumuliert/getSurplusCount` | Kumulierter Überschuss-Werte aus `monthly_states.surplus_actual`. |
+| `toggleInc/Exp/Routine`, `dismissTip/restoreTip/acceptTip` | Bool-Toggle + Async-Upsert. |
+| `addIncome/addExpense`, `del*`, `edit*` | One-off-Entries verwalten (optimistic mit Temp-IDs). |
 
-```json
-{
-  "version": "fc-v9",
-  "exportedAt": "2026-05-25T...",
-  "data": { ...komplettes state-Objekt... }
-}
-```
+Alle Setter sind **optimistic**: Cache wird sofort aktualisiert + `render()` läuft, Supabase-Write feuert im Hintergrund. Bei Fehler erscheint ein Toast; in `_addOneOff`/`_deleteOneOff`/`_updateOneOff` wird der Cache zurückgerollt.
 
 ## Konventionen
 
-- **Globale Funktionen**, keine Module — *Ausnahme:* `supabase-client.js` ist ein ES-Modul und schreibt sich auf `window.supabase`. Die anderen Skripte bleiben non-module und legen Funktionen am `window`-Objekt ab (`addIncome()`, `toggleTheme()`, `render()`, …).
+- **Globale Funktionen**, keine Module — *Ausnahmen:* `supabase-client.js` und `auth.js` sind ES-Module. Die anderen Skripte bleiben non-module und legen Funktionen am `window`-Objekt ab (`addIncome()`, `toggleTheme()`, `render()`, …).
 - **Inline-`onclick` im HTML**, kein zentrales Event-Binding. Beim Hinzufügen neuer Buttons im gleichen Stil weitermachen.
 - **Re-Render statt diff** — nach jedem State-Change wird `render()` / `renderTips()` / `updateHaushalt()` aufgerufen, das DOM komplett neu erzeugt.
 - **CSS-Variablen** in `:root` und `[data-theme="light"]` — Themes werden ausschließlich darüber gesteuert. Keine hardcodierten Farben in `components.css`.
 - **Geldbeträge** mit `fmt(n)` formatieren — gibt `"1.234,56 €"` zurück (deutsches Format, Komma als Dezimaltrenner).
 - **IDs sind stabile Identifier**, Namen sind frei editierbar. Niemals die `id` ändern, nur den `name`.
+- **Body-Klassen** `fc-auth-loading` / `fc-auth-signed-out` / `fc-auth-signed-in` steuern die Sichtbarkeit (Topbar/Container/Auth-Gate). Auth.js wechselt sie.
 
 ## Was NICHT tun
 
 - **Kein Framework hinzufügen** (React, Vue, Svelte etc.) — solange Vanilla trägt.
-- **Keinen Build-Schritt einführen** (Vite, Webpack, esbuild) — solange CDN-Imports reichen. Wenn die Komplexität es zwingt (z.B. mehrere Module, TypeScript), neu evaluieren.
-- **Keine Slug-Werte** in `INCOME_BASE_DEF` / `EXPENSES_DEF` (oder den entsprechenden Supabase-Seed-Defaults) ändern — würde bestehende User-Daten von ihren Defaults entkoppeln.
-- **Script-Reihenfolge in `index.html`** nicht umstellen — non-module Funktionen aus späteren Skripten sind beim Laden früherer noch nicht definiert.
-- **`js/config.js` niemals committen** — enthält Supabase-Credentials. Ist in `.gitignore`. Nur `config.example.js` (mit Platzhaltern) ist im Repo.
+- **Keinen Build-Schritt einführen** — solange CDN-Imports reichen.
+- **Default-Werte ändern** im Signup-Bootstrap-Trigger (`supabase/etappe-c-bootstrap.sql`) ohne Migrations-Plan — bestehende User behalten ihre Daten, neue User bekommen die neuen Defaults; Inkonsistenz möglich.
+- **Script-Reihenfolge in `index.html`** nicht umstellen.
+- **`js/config.js` niemals committen** — enthält Supabase-Credentials. Ist in `.gitignore`.
 - **`service_role`-Key niemals ins Frontend** — gehört ausschließlich in Supabase Edge Functions.
-- **Personenbezogene Daten** in `data.js` (oder anderswo im Code) hinterlegen — alles Konkrete gehört ins Backend bzw. die Defaults bleiben generisch.
+- **Personenbezogene Daten** in `data.js` (oder anderswo im Code) hinterlegen — alles Konkrete gehört ins Backend.
 
 ## Verlauf wichtiger Schema-Änderungen
 
-- `fc-state-v3` → `fc-state-v4`: Einführung von `state.names` (User kann Namen überschreiben). Alte Default-IDs für Personalisierung wurden ersetzt durch generische Beispiele (gehalt/nebenjob/sonstiges + miete/strom/internet/streaming).
-- **`fc-state-v4` (localStorage) → Supabase (Phase 1)**: Schema-Doku in `docs/supabase-schema.md`, SQL-Migrations in `supabase/etappe-{a,b,c}-*.sql`. Bei der Migration: frischer Start, keine Übernahme alter localStorage-Daten beschlossen.
+- `fc-state-v3` → `fc-state-v4`: Einführung von `state.names` (User kann Namen überschreiben).
+- **`fc-state-v4` (localStorage) → Supabase (Phase 1, abgeschlossen)**: Schema in `docs/supabase-schema.md`, SQL-Migrations in `supabase/etappe-{a,b,c,d}-*.sql`. Frischer Start, keine Übernahme alter localStorage-Daten.
+- **Etappe D** (`positions_snapshot` in `monthly_states`): historische Monate behalten ihre damaligen Beträge auch nach späterer Edit-Aktion in `positions`.
 
 ## Hilfreiche Einstiegspunkte
 
-- Neue Einnahmenkategorie hinzufügen: `data.js` → `INCOME_BASE_DEF`
-- Neue Ausgabenkategorie: `data.js` → `EXPENSES_DEF` (mit `cat:` aus `CAT`)
-- Berechnung Überschuss anpassen: `js/haushalt.js` → `updateHaushalt()` (Monatsrechnung-Posten werden aus `getIncome()`/`getExpenses()` + Extras gespiegelt, plus Haushalt-eigene `hh_spar` & `hh_var`)
-- Neuen Tab hinzufügen: `<div class="tab" onclick="showTab('name',this)">` im Topnav + `<div id="tab-name" class="page">` im Container
-- Theme-Farbe ändern: `css/base.css` → `:root` bzw. `[data-theme="light"]`
+- Default-Positionen/Routinen ändern: `supabase/etappe-c-bootstrap.sql` (greift nur für neue User).
+- Berechnung Überschuss anpassen: `js/haushalt.js` → `updateHaushalt()` (Monatsrechnung-Posten werden aus `getIncome()`/`getExpenses()` + Extras gespiegelt, plus Haushalt-eigene `hh_spar` & `hh_var`).
+- Neuen Tab hinzufügen: `<div class="tab" onclick="showTab('name',this)">` im Topnav + `<div id="tab-name" class="page">` im Container.
+- Theme-Farbe ändern: `css/base.css` → `:root` bzw. `[data-theme="light"]`.
+- Auth-Flow anpassen: `js/auth.js` (`enterApp`/`leaveApp`, `screens.*` Form-Handler).

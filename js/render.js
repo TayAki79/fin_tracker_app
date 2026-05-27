@@ -87,7 +87,7 @@ function renderKumBox() {
   const cur = getSurplus(key);
   const kum = getKumuliert();
   const monthName = MONTHS[parseInt(selM.value)];
-  const count = Object.keys(state.surplusEntries || {}).length;
+  const count = getSurplusCount();
   const box = document.getElementById("kum-box");
   if (!box) return;
   box.innerHTML = `
@@ -212,15 +212,17 @@ function render() {
 
 /* --- Routine Tab --- */
 function renderRoutine() {
-  const done = ROUTINE_ITEMS.filter((r) => isRoutineDone(r.id)).length;
-  const pct = Math.round((done / ROUTINE_ITEMS.length) * 100);
+  const items = getRoutines();
+  const total = items.length || 1;
+  const done = items.filter((r) => isRoutineDone(r.id)).length;
+  const pct = Math.round((done / total) * 100);
   document.getElementById("prog-routine-label").textContent =
-    `${done} / ${ROUTINE_ITEMS.length} — ${pct} %`;
+    `${done} / ${items.length} — ${pct} %`;
   const rb = document.getElementById("prog-routine-bar");
   rb.style.width = pct + "%";
   rb.style.background = progColor(pct);
 
-  document.getElementById("routine-list").innerHTML = ROUTINE_ITEMS.map((r) => {
+  document.getElementById("routine-list").innerHTML = items.map((r) => {
     const d = isRoutineDone(r.id);
     return `<div class="routine-item">
       <div class="routine-day"><span>${r.day}</span></div>

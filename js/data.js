@@ -18,63 +18,9 @@ const MONTHS = [
   "Dezember",
 ];
 
-const INCOME_BASE_DEF = [
-  { id: "gehalt", name: "Gehalt", amount: 2000, day: "1." },
-  { id: "nebenjob", name: "Nebenjob", amount: 400, day: "15." },
-  { id: "sonstiges", name: "Sonstiges", amount: 100, day: "20." },
-];
-
-const EXPENSES_DEF = [
-  { id: "miete", name: "Miete", amount: 800, cat: "wohnen" },
-  { id: "strom", name: "Strom", amount: 60, cat: "wohnen" },
-  { id: "internet", name: "Internet", amount: 30, cat: "wohnen" },
-  { id: "streaming", name: "Streaming-Abo", amount: 15, cat: "abo" },
-];
-
-const ROUTINE_ITEMS = [
-  {
-    id: "r1",
-    day: "01.",
-    title: "Einnahmen prüfen",
-    desc: "Sind alle Einnahmen (Gehalt, Nebeneinkommen, ...) auf dem Konto eingegangen?",
-  },
-  {
-    id: "r2",
-    day: "01.",
-    title: "Sparrate überweisen",
-    desc: "Den festen Sparbetrag direkt auf das Sparkonto / ETF-Depot transferieren — bevor anderes ausgegeben wird.",
-  },
-  {
-    id: "r3",
-    day: "01.",
-    title: "Budget setzen",
-    desc: "Variables Monatsbudget festlegen (z.B. als Bargeld entnehmen oder als Limit notieren).",
-  },
-  {
-    id: "r4",
-    day: "Monatsmitte",
-    title: "Budget-Check",
-    desc: "Wie viel vom variablen Budget ist noch übrig? Notwendige Korrekturen jetzt vornehmen.",
-  },
-  {
-    id: "r5",
-    day: "Monatsende",
-    title: "Fixkosten prüfen",
-    desc: "Wurden alle Fixkosten (Miete, Strom, Abos) korrekt abgebucht?",
-  },
-  {
-    id: "r6",
-    day: "Monatsende",
-    title: "Überschuss verbuchen",
-    desc: "Differenz aus Einnahmen und Ausgaben in die Barreserve oder Sparpläne überführen.",
-  },
-  {
-    id: "r7",
-    day: "Monatsende",
-    title: "Nächsten Monat planen",
-    desc: "Sonderausgaben (Versicherungen, Geschenke, Reisen) im Blick behalten.",
-  },
-];
+/* Hinweis: Per-User-Defaults (Einnahmen, Ausgaben, Routinen) leben jetzt
+   im Supabase-Signup-Bootstrap-Trigger (supabase/etappe-c-bootstrap.sql).
+   Diese Datei hält nur noch statische, anwendungs-globale Inhalte. */
 
 const TIPS_DATA = [
   {

@@ -106,6 +106,114 @@ async function withLoading(form, label, fn) {
   }
 }
 
+/* --- Helper: Daten laden + UI in App-Modus schalten ---
+   Wenn irgendwas in der Bootstrap-Kette knallt (Cache-Stand,
+   defekte Supabase-Antwort, Supabase-Outage, eingefrorenes
+   Free-Tier-Projekt), gibt es einen Timeout. Danach wird der
+   User explizit auf den Login zurückgeworfen — nie wieder ein
+   endloser Spinner.
+
+   Dedup-Schutz: Es gibt zwei Einstiegspunkte (initialer
+   getSession()-Call + onAuthStateChange-Handler). Ohne Schutz
+   würden beide enterApp parallel ausführen — Race-Condition,
+   die im Fehlerfall einen „Login-flash → App-mit-leerem-Cache"-
+   Effekt produziert hat. _enteredUserId hält fest, für welchen
+   User wir den Bootstrap bereits laufen lassen. */
+const BOOTSTRAP_TIMEOUT_MS = 90000;
+let _enteredUserId = null;
+
+function withTimeout(promise, ms, label) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) =>
+      setTimeout(
+        () => reject(new Error(`${label}: Timeout nach ${ms} ms — Supabase antwortet nicht`)),
+        ms,
+      ),
+    ),
+  ]);
+}
+
+async function enterApp(session) {
+  if (_enteredUserId === session.user.id) {
+    console.log("[auth] enterApp dedup — schon eingeloggt für", session.user.email);
+    return;
+  }
+  _enteredUserId = session.user.id;
+  /* Hint nach 5s einblenden, damit der User weiß, dass Supabase
+     gerade aus dem Free-Tier-Schlaf aufwacht — kann bis zu 60s
+     dauern beim allerersten Request. */
+  const hintEl = document.getElementById("auth-loading-hint");
+  if (hintEl) hintEl.style.display = "none";
+  const hintTimer = setTimeout(() => {
+    if (hintEl) hintEl.style.display = "block";
+  }, 5000);
+  try {
+    setUserEmail(session.user.email);
+    if (typeof window.stateBootstrap !== "function") {
+      throw new Error(
+        "stateBootstrap nicht verfügbar — state.js veraltet im Cache. Strg+Shift+R, dann nochmal.",
+      );
+    }
+    const ok = await withTimeout(
+      window.stateBootstrap(session.user.id),
+      BOOTSTRAP_TIMEOUT_MS,
+      "Datenladen",
+    );
+    if (!ok) {
+      throw new Error("Bootstrap fehlgeschlagen — siehe Konsole");
+    }
+    clearTimeout(hintTimer);
+    if (typeof window.fcRenderAll === "function") window.fcRenderAll();
+    setBodyState("signed-in");
+  } catch (e) {
+    clearTimeout(hintTimer);
+    console.error("[auth] enterApp failed:", e);
+    showAuthError(
+      (e.message || "Daten konnten nicht geladen werden") +
+        " — bitte neu laden oder erneut einloggen.",
+    );
+    _enteredUserId = null;
+    /* Wichtig: KEIN signOut() hier — das würde verzögert ein
+       SIGNED_OUT-Event feuern, das den nächsten frischen Login
+       teardown'd (Race-Condition). Session bleibt in localStorage,
+       der nächste Reload oder Login-Submit triggert einen neuen
+       Bootstrap-Versuch. */
+    if (typeof window.stateTeardown === "function") window.stateTeardown();
+    setBodyState("signed-out");
+    showScreen("login");
+  }
+}
+
+/* Fehler über das Auth-Gate sichtbar machen — der Logout-Toast wäre
+   versteckt, weil die Topbar im signed-out-State unsichtbar ist.
+   Bietet zusätzlich einen Retry-Link, der die Seite neu lädt — bei
+   transienten Supabase-Hängern (Cold-Start o.ä.) reicht das meist. */
+function showAuthError(msg) {
+  const loginForm = screens.login;
+  if (!loginForm) return;
+  const slot = loginForm.querySelector("[data-error-slot]");
+  if (!slot) return;
+  slot.innerHTML = "";
+  const text = document.createElement("span");
+  text.textContent = msg;
+  slot.appendChild(text);
+  const retry = document.createElement("button");
+  retry.type = "button";
+  retry.className = "auth-error-retry";
+  retry.textContent = "Erneut versuchen";
+  retry.addEventListener("click", () => location.reload());
+  slot.appendChild(retry);
+  slot.classList.add("visible");
+}
+
+function leaveApp() {
+  _enteredUserId = null;
+  if (typeof window.stateTeardown === "function") window.stateTeardown();
+  setBodyState("signed-out");
+  showScreen("login");
+}
+
 /* --- Initialer Zustand ---
    Wartet auf den ersten getSession()-Call, entscheidet dann. */
 (async () => {
@@ -114,8 +222,7 @@ async function withLoading(form, label, fn) {
     setBodyState("signed-out");
     showScreen("reset");
   } else if (data.session) {
-    setBodyState("signed-in");
-    setUserEmail(data.session.user.email);
+    await enterApp(data.session);
   } else {
     setBodyState("signed-out");
     showScreen("login");
@@ -123,7 +230,7 @@ async function withLoading(form, label, fn) {
 })();
 
 /* --- onAuthStateChange — reagiert auf alle weiteren Wechsel --- */
-supabase.auth.onAuthStateChange((event, session) => {
+supabase.auth.onAuthStateChange(async (event, session) => {
   if (event === "PASSWORD_RECOVERY") {
     isRecoveryFlow = true;
     setBodyState("signed-out");
@@ -133,8 +240,7 @@ supabase.auth.onAuthStateChange((event, session) => {
 
   if (event === "SIGNED_OUT") {
     isRecoveryFlow = false;
-    setBodyState("signed-out");
-    showScreen("login");
+    leaveApp();
     return;
   }
 
@@ -144,8 +250,7 @@ supabase.auth.onAuthStateChange((event, session) => {
       showScreen("reset");
       return;
     }
-    setBodyState("signed-in");
-    setUserEmail(session.user.email);
+    await enterApp(session);
     return;
   }
 });

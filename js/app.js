@@ -68,20 +68,28 @@ function showTab(name, el) {
   if (el) el.classList.add("active");
 }
 
-/* --- Monat/Jahr Wechsel löst Re-Render aus --- */
+/* --- Monat/Jahr Wechsel löst Re-Render aus ---
+   Schutz: nur rendern, wenn der State bereits aus Supabase
+   geladen wurde — vor dem Bootstrap würde der Renderer leere
+   Strukturen verarbeiten und Fehler werfen. */
 selM.addEventListener("change", () => {
-  render();
   updateIssueNum();
+  if (typeof stateIsReady === "function" && stateIsReady()) render();
 });
 selY.addEventListener("change", () => {
-  render();
   updateIssueNum();
+  if (typeof stateIsReady === "function" && stateIsReady()) render();
 });
 
-/* --- Initialer Render --- */
-updateLastExportInfo();
+/* --- Initialer Aufbau (nicht-daten-abhängig) ---
+   render(), renderRoutine(), renderTips(), updateHaushalt() werden
+   von auth.js aufgerufen, NACHDEM stateBootstrap() durchgelaufen ist. */
 updateIssueNum();
-render();
-renderRoutine();
-renderTips();
-updateHaushalt();
+
+function fcRenderAll() {
+  render();
+  renderRoutine();
+  renderTips();
+  updateHaushalt();
+}
+window.fcRenderAll = fcRenderAll;
