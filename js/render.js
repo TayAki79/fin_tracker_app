@@ -81,6 +81,22 @@ function saveSurplusMonth() {
   renderKumBox();
   showToast("✓ " + MONTHS[parseInt(selM.value)] + " gespeichert");
 }
+/* Plan-Überschuss = monatliche Einnahmen − Ausgaben (Fixkosten als Ø,
+   yearly/quarterly anteilig). Spiegelt, was rechnerisch übrig sein
+   sollte — die Ist-Eingabe vergleicht der User damit. */
+function calcPlanSurplus() {
+  const inc = [...getIncome(), ...getExtraIncome()].reduce(
+    (s, p) => s + p.amount,
+    0,
+  );
+  const exp = [...getExpenses(), ...getExtraExpense()].reduce((s, p) => {
+    if (p.yearly) return s + p.amount / 12;
+    if (p.quarterly) return s + p.amount / 3;
+    return s + p.amount;
+  }, 0);
+  return inc - exp;
+}
+
 function renderKumBox() {
   const selM = document.getElementById("selMonth");
   const key = getKey();
@@ -88,14 +104,34 @@ function renderKumBox() {
   const kum = getKumuliert();
   const monthName = MONTHS[parseInt(selM.value)];
   const count = getSurplusCount();
+  const plan = calcPlanSurplus();
+  const diff = cur !== null ? cur - plan : null;
   const box = document.getElementById("kum-box");
   if (!box) return;
+
+  const diffClass = diff === null ? "" : diff >= 0 ? "positive" : "negative";
+  const diffPrefix = diff !== null && diff >= 0 ? "+" : "";
+
   box.innerHTML = `
     <div class="lbl">Kumulierter Überschuss</div>
     <div class="val">${kum >= 0 ? "+" : ""}${fmt(kum)}</div>
-    <div class="kum-entry">
-      <input id="kum-inp" type="number" step="0.01" placeholder="${monthName}…" value="${cur !== null ? cur.toFixed(2) : ""}">
-      <button onclick="saveSurplusMonth()">✓</button>
+    <div class="kum-detail">
+      <div class="kum-detail-row">
+        <span>Plan ${monthName}</span>
+        <span class="kum-plan">${plan >= 0 ? "+" : ""}${fmt(plan)}</span>
+      </div>
+      <div class="kum-entry">
+        <input id="kum-inp" type="number" step="0.01" placeholder="Ist ${monthName} …" value="${cur !== null ? cur.toFixed(2) : ""}">
+        <button onclick="saveSurplusMonth()">✓</button>
+      </div>
+      ${
+        diff !== null
+          ? `<div class="kum-detail-row">
+        <span>Differenz</span>
+        <span class="kum-diff ${diffClass}">${diffPrefix}${fmt(diff)}</span>
+      </div>`
+          : ""
+      }
     </div>
     <div class="kum-sub">${count} Monat${count !== 1 ? "e" : ""} erfasst</div>`;
 }

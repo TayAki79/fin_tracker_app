@@ -146,6 +146,47 @@
 }
 .metric.kum .val { color: var(--accent); }
 
+/* Kum-Box — Plan/Ist/Differenz */
+.kum-detail {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: var(--hair) solid var(--border);
+}
+.kum-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 4px 0;
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text2);
+  letter-spacing: 0.005em;
+}
+.kum-detail-row > span:first-child {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+.kum-detail-row > span:last-child {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  font-feature-settings: "tnum", "lnum";
+  letter-spacing: 0.01em;
+}
+.kum-plan { color: var(--accent); }
+.kum-diff.positive { color: var(--green); }
+.kum-diff.negative { color: var(--red); }
+/* Innerhalb .kum-detail keine zusätzliche Trennlinie nötig — .kum-detail liefert sie schon */
+.kum-detail .kum-entry {
+  margin-top: 6px;
+  border-top: none;
+  padding-top: 0;
+}
+
 /* Kumulierter Überschuss Input */
 .kum-entry {
   display: flex;
