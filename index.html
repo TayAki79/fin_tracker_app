@@ -11,7 +11,120 @@
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/components.css">
 </head>
-<body>
+<body class="fc-auth-loading">
+
+<!-- ============================================================
+     AUTH-LOADING — initialer Spinner, bevor die Session aufgelöst ist
+     ============================================================ -->
+<div id="auth-loading">
+  <div class="auth-loading-dot"></div>
+  <div class="auth-loading-label">Verbinde …</div>
+</div>
+
+<!-- ============================================================
+     AUTH-GATE — Login, Register, Reset (nur bei !session sichtbar)
+     ============================================================ -->
+<div id="auth-gate">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <h1>Finanz<span class="amp">·</span>Cockpit</h1>
+      <div class="auth-tagline" id="auth-tagline">Anmeldung</div>
+    </div>
+
+    <!-- Login -->
+    <form class="auth-screen active" id="auth-screen-login" autocomplete="on">
+      <label class="auth-field">
+        <span>Email</span>
+        <input type="email" name="email" required autocomplete="email" placeholder="name@beispiel.de" />
+      </label>
+      <label class="auth-field">
+        <span>Passwort</span>
+        <input type="password" name="password" required autocomplete="current-password" placeholder="••••••••" minlength="8" />
+      </label>
+      <div class="auth-error" data-error-slot></div>
+      <button type="submit" class="auth-submit">Anmelden</button>
+      <div class="auth-links">
+        <button type="button" class="auth-link" data-go="register">Noch kein Konto? — registrieren</button>
+        <button type="button" class="auth-link auth-link-muted" data-go="forgot">Passwort vergessen?</button>
+      </div>
+    </form>
+
+    <!-- Register -->
+    <form class="auth-screen" id="auth-screen-register" autocomplete="on">
+      <label class="auth-field">
+        <span>Email</span>
+        <input type="email" name="email" required autocomplete="email" placeholder="name@beispiel.de" />
+      </label>
+      <label class="auth-field">
+        <span>Passwort</span>
+        <input type="password" name="password" required autocomplete="new-password" placeholder="mindestens 8 Zeichen" minlength="8" />
+      </label>
+      <div class="auth-hint">Mit der Registrierung legst du dein persönliches Cockpit an.</div>
+      <div class="auth-error" data-error-slot></div>
+      <button type="submit" class="auth-submit">Konto erstellen</button>
+      <div class="auth-links">
+        <button type="button" class="auth-link" data-go="login">← zurück zum Login</button>
+      </div>
+    </form>
+
+    <!-- Verify-Info -->
+    <div class="auth-screen" id="auth-screen-verify">
+      <div class="auth-message">
+        <div class="auth-message-title">Bestätige deine Email</div>
+        <div class="auth-message-body">
+          Wir haben dir einen Bestätigungslink an <strong id="auth-verify-email">deine Adresse</strong> geschickt.
+          Klicke ihn an, um dein Konto zu aktivieren. Danach kannst du dich hier einloggen.
+        </div>
+      </div>
+      <div class="auth-links">
+        <button type="button" class="auth-link" data-go="login">← zurück zum Login</button>
+      </div>
+    </div>
+
+    <!-- Forgot Password -->
+    <form class="auth-screen" id="auth-screen-forgot" autocomplete="on">
+      <label class="auth-field">
+        <span>Email</span>
+        <input type="email" name="email" required autocomplete="email" placeholder="name@beispiel.de" />
+      </label>
+      <div class="auth-hint">Wir schicken dir einen Link zum Zurücksetzen deines Passworts.</div>
+      <div class="auth-error" data-error-slot></div>
+      <button type="submit" class="auth-submit">Link senden</button>
+      <div class="auth-links">
+        <button type="button" class="auth-link" data-go="login">← zurück zum Login</button>
+      </div>
+    </form>
+
+    <!-- Forgot Sent -->
+    <div class="auth-screen" id="auth-screen-forgot-sent">
+      <div class="auth-message">
+        <div class="auth-message-title">Email verschickt</div>
+        <div class="auth-message-body">
+          Falls ein Konto zu dieser Adresse existiert, ist jetzt ein Reset-Link unterwegs.
+          Prüfe dein Postfach.
+        </div>
+      </div>
+      <div class="auth-links">
+        <button type="button" class="auth-link" data-go="login">← zurück zum Login</button>
+      </div>
+    </div>
+
+    <!-- Reset Password (Recovery-Flow) -->
+    <form class="auth-screen" id="auth-screen-reset" autocomplete="on">
+      <div class="auth-hint">Wähle ein neues Passwort.</div>
+      <label class="auth-field">
+        <span>Neues Passwort</span>
+        <input type="password" name="password" required autocomplete="new-password" placeholder="mindestens 8 Zeichen" minlength="8" />
+      </label>
+      <div class="auth-error" data-error-slot></div>
+      <button type="submit" class="auth-submit">Passwort speichern</button>
+    </form>
+  </div>
+
+  <div class="auth-foot">
+    <button class="theme-btn" id="authThemeBtn" onclick="toggleTheme()">🌙</button>
+  </div>
+</div>
 
 <!-- ============================================================
      TOPBAR
@@ -26,10 +139,15 @@
     <h1>Finanz<span class="amp">·</span>Cockpit</h1>
   </div>
   <div class="topbar-right">
+    <span class="user-chip" id="user-chip" title="Angemeldet">
+      <span class="user-chip-dot"></span>
+      <span id="user-email"></span>
+    </span>
     <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
     <button class="io-btn btn-export" onclick="exportData()">Export</button>
     <button class="io-btn btn-import" onclick="document.getElementById('importFile').click()">Import</button>
     <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+    <button class="io-btn btn-logout" id="logoutBtn">Abmelden</button>
   </div>
 </div>
 
@@ -255,6 +373,7 @@
 <script src="js/haushalt.js"></script>
 <script src="js/app.js"></script>
 <script type="module" src="js/supabase-client.js"></script>
+<script type="module" src="js/auth.js"></script>
 
 </body>
 </html>
