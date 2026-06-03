@@ -47,7 +47,8 @@ fin_tracker_web/
 │   ├── etappe-a-tables.sql            # Tabellen + Indexe + Trigger
 │   ├── etappe-b-rls.sql               # Row-Level-Security-Policies
 │   ├── etappe-c-bootstrap.sql         # Signup-Trigger (Auto-Bootstrap neuer User)
-│   └── etappe-d-positions-snapshot.sql # positions_snapshot-Spalte für monthly_states
+│   ├── etappe-d-positions-snapshot.sql # positions_snapshot-Spalte für monthly_states
+│   └── etappe-e-rls-audit.sql          # Read-only RLS-Verifikation (Isolation beweisen)
 └── js/                     # Reihenfolge in index.html ist KRITISCH
     ├── data.js             # Statische Inhalte (MONTHS, TIPS_DATA, CAT)
     ├── state.js            # Supabase-backed In-Memory-Cache (window.stateBootstrap/Teardown)
@@ -154,6 +155,7 @@ Alle Setter sind **optimistic**: Cache wird sofort aktualisiert + `render()` lä
 - `fc-state-v3` → `fc-state-v4`: Einführung von `state.names` (User kann Namen überschreiben).
 - **`fc-state-v4` (localStorage) → Supabase (Phase 1, abgeschlossen)**: Schema in `docs/supabase-schema.md`, SQL-Migrations in `supabase/etappe-{a,b,c,d}-*.sql`. Frischer Start, keine Übernahme alter localStorage-Daten.
 - **Etappe D** (`positions_snapshot` in `monthly_states`): historische Monate behalten ihre damaligen Beträge auch nach späterer Edit-Aktion in `positions`.
+- **Etappe E** (`etappe-e-rls-audit.sql`, Phase 2): read-only Audit-Skript, das die RLS-Isolation auf der Live-DB beweist (RLS-Status, Policy-Inventar, Lücken-Detektor, Live-Cross-User-Test mit ROLLBACK). Verändert nichts. Befund Phase-2-Start: Design sauber, keine kritischen Lücken; offene Notizen N1–N3 in der SQL-Auswertung.
 
 ## Hilfreiche Einstiegspunkte
 
@@ -163,3 +165,58 @@ Alle Setter sind **optimistic**: Cache wird sofort aktualisiert + `render()` lä
 - Neuen Tab hinzufügen: `<div class="tab" onclick="showTab('name',this)">` im Topnav + `<div id="tab-name" class="page">` im Container.
 - Theme-Farbe ändern: `css/base.css` → `:root` bzw. `[data-theme="light"]`.
 - Auth-Flow anpassen: `js/auth.js` (`enterApp`/`leaveApp`, `screens.*` Form-Handler).
+
+---
+
+## Roadmap zum App-Store-Launch
+
+Ziel: Web-App + native iOS/Android-App so schnell wie seriös möglich live, dann monetarisieren.
+Stack-Entscheidung für die App: **Capacitor** — verpackt die bestehende Vanilla-HTML/CSS/JS-App in echte iOS/Android-Apps. Eine Codebasis, kein Rewrite, kein Framework (passt zu „Vanilla bleibt").
+
+| Phase | Ziel (warum) | Kern-Schritte | Aufwand | Status |
+|---|---|---|---|---|
+| **1 — Fundament** | Multi-User-Basis | Supabase, Auth, RLS, 4 Tabs | — | ✅ erledigt |
+| **2 — Web-App härten** | Vom Prototyp zum stabilen Produkt | **RLS-Audit** (User A darf nie Daten von User B sehen) · Account-Löschung in-App (Apple-Pflicht) · Error-Handling · Empty-State/Onboarding · Mobile-Layout · CDN-Imports lokal ins Projekt holen | ~2–3 Wo | offen |
+| **3 — Recht & Landing** | Pflicht vor Veröffentlichung | Impressum · Datenschutz (DSGVO) · AGB · Support-URL · Landingpage | ~1 Wo | offen |
+| **4 — Closed Beta** | Validieren *bevor* App-Aufwand entsteht | 5–10 echte Tester · Feedback · Bugfixing | ~2–3 Wo (parallel) | offen |
+| **5 — Native Wrapping** | Beide Stores aus einer Codebasis | Capacitor einrichten · Android-Build (PC) · iOS-Build (Mac) · Test auf echten Geräten · Icon/Splash | ~1–2 Wo | offen |
+| **6 — Store-Launch** | Live in Play Store + App Store | Developer-Accounts (Google + Apple) · Store-Assets/Screenshots · Datensicherheits-/Privacy-Formulare · Einreichung · Review-Runden | ~2–4 Wo | offen |
+| **7 — Monetarisierung** | Freemium scharf schalten | Free/Pro-Grenze · In-App-Abo bzw. Affiliate | laufend | offen |
+
+**Realistische Gesamtdauer bis live:** ~2–3 Monate bei ~8–12 h/Woche. Engpässe sind nicht der Code, sondern Apples Review (Finanz-Apps werden extra geprüft, Rejection-Runden einplanen) und der Rechts-Unterbau.
+
+**Grundregel:** In den Store kommen ≠ Geld verdienen. Phase 4 (echte Tester) steht bewusst VOR dem App-Aufwand. Erst validieren, dann verpacken.
+
+**Plattform-Strategie:** Aktuell kein eigener Mac. Geplant: **Mac wird in Phase 5 angeschafft** (iOS-Builds gehen nur auf macOS/Xcode). Damit laufen beide Stores parallel über denselben Capacitor-Code — Android-Build auf dem PC, iOS-Build auf dem Mac. Cloud-Build-Dienste (z. B. Codemagic) bleiben als Fallback notiert, sind aber bei eigenem Mac nicht nötig.
+
+## Kostenübersicht
+
+Heute (Phase 1–4): **0 €.**
+
+### Pflicht bis Launch
+
+| Posten | Typ | Kosten | Phase |
+|---|---|---|---|
+| Apple Developer Program | jährlich | ~99 €/Jahr | 6 |
+| Google Play Developer | einmalig | ~25 € | 6 |
+| Domain (.de/.com) | jährlich | ~10–15 €/Jahr | 3 |
+| Mac für iOS-Builds | einmalig (Phase 5) | ab ~700 € (Mac mini), geplant zur Build-Phase | 5 |
+
+⚠️ **iOS-Builds gehen NUR auf einem Mac** (Xcode = macOS only). Android baut auf dem PC. Mac wird in Phase 5 angeschafft.
+**Minimum bis live ≈ 136 €/Jahr** (Apple + Google + Domain) + **einmalig ab ~700 € Mac** (Phase 5).
+
+### Läuft mit dem Wachstum (erst bei echten Nutzern)
+
+| Posten | Kosten | Wann |
+|---|---|---|
+| Supabase Pro | ~23 €/Mo | erst wenn Free-Tier-Limits (500 MB DB / Auth) reißen |
+| Store-Provision | 15 % vom Umsatz (Small-Business-Programm) | sobald jemand zahlt |
+| Stripe (Web-Abo, optional) | ~1,5 % + 0,25 €/Transaktion | falls Verkauf auch über Website |
+
+### Optional
+
+- Datenschutz/Impressum/AGB: Generator 0–250 € einmalig, oder anwaltlich geprüft 300–800 €.
+
+## Rechtlicher Hinweis (BaFin)
+
+Solange die App ein reiner **Tracker** ist und Finanztipps **allgemein** formuliert sind → i. d. R. außerhalb der BaFin-Regulierung. Sobald **personalisierte Anlageempfehlungen** gegeben oder **Zahlungen abgewickelt** werden → regulatorisch heikel. Tipps deshalb immer kennzeichnen als „allgemeine Info, keine Anlageberatung".
