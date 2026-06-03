@@ -144,6 +144,7 @@ Alle Setter sind **optimistic**: Cache wird sofort aktualisiert + `render()` lä
 - **Inline-`onclick` im HTML**, kein zentrales Event-Binding. Beim Hinzufügen neuer Buttons im gleichen Stil weitermachen.
 - **Re-Render statt diff** — nach jedem State-Change wird `render()` / `renderTips()` / `updateHaushalt()` aufgerufen, das DOM komplett neu erzeugt.
 - **CSS-Variablen** in `:root` und `[data-theme="light"]` — Themes werden ausschließlich darüber gesteuert. Keine hardcodierten Farben in `components.css`.
+- **Responsive/Touch** (Phase 2): Breakpoints bei 980px + 600px (`layout.css`); Mobile-/Touch-Block am Ende von `components.css`. Auf `@media (hover: none)` müssen hover-versteckte Elemente (z.B. `.edit-btn`) sichtbar sein — sonst am Handy unbenutzbar. Inputs auf Mobile ≥ 16px (sonst iOS-Zoom). Safe-Area via `env(safe-area-inset-*)` + `viewport-fit=cover` (fürs Capacitor-Wrapping).
 - **Geldbeträge** mit `fmt(n)` formatieren — gibt `"1.234,56 €"` zurück (deutsches Format, Komma als Dezimaltrenner).
 - **IDs sind stabile Identifier**, Namen sind frei editierbar. Niemals die `id` ändern, nur den `name`.
 - **Body-Klassen** `fc-auth-loading` / `fc-auth-signed-out` / `fc-auth-signed-in` steuern die Sichtbarkeit (Topbar/Container/Auth-Gate). Auth.js wechselt sie.

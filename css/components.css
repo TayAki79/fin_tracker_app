@@ -1577,3 +1577,54 @@ body:not(.fc-auth-signed-in) .btn-logout { display: none; }
   background: var(--accent-2);
   border-color: var(--accent-2);
 }
+
+/* ============================================================
+   MOBILE / TOUCH — Phase 2 Mobile-Layout
+   ============================================================ */
+
+/* Touch-Geräte haben kein :hover. Der Edit-Button (✎) ist sonst
+   per opacity:0 versteckt → Beträge/Namen wären am Handy nicht
+   editierbar. Hier dauerhaft sichtbar + größere Tap-Flächen. */
+@media (hover: none) {
+  .edit-btn,
+  .row .edit-btn,
+  .srow .edit-btn,
+  .sval .edit-btn { opacity: 1; }
+
+  .edit-btn,
+  .del-btn {
+    padding: 10px;
+    font-size: 15px;
+  }
+  .tip-btn { padding: 12px 18px; }
+  .theme-btn { width: 40px; height: 40px; }
+  .modal-close { padding: 6px 10px; }
+}
+
+/* Modals scrollbar machen, falls der Inhalt höher als der Screen ist
+   (kleine Telefone + Onboarding-Karte). */
+.modal-backdrop { overflow-y: auto; }
+.modal-card { max-height: calc(100vh - 48px); overflow-y: auto; }
+
+@media (max-width: 600px) {
+  /* iOS zoomt beim Fokus, wenn die Input-Schrift < 16px ist. */
+  input, select, textarea { font-size: 16px; }
+  .inline-input { width: 88px; }
+
+  /* Topbar-rechts nicht überladen — Buttons enger, E-Mail kürzer. */
+  .topbar-right { gap: 6px; }
+  .user-chip { max-width: 96px; }
+
+  .modal-card { padding: 22px; }
+  .onboarding-title { font-size: 26px; }
+}
+
+/* Safe-Area-Insets für Notch-/Home-Indicator-Geräte (Capacitor).
+   env() ist 0 ohne Notch → max() bleibt beim Normalwert, kein Effekt
+   auf dem Desktop. Braucht viewport-fit=cover im <meta viewport>. */
+@supports (padding: max(0px)) {
+  .topbar { padding-top: max(18px, env(safe-area-inset-top)); }
+  .container { padding-bottom: max(80px, calc(48px + env(safe-area-inset-bottom))); }
+  .offline-banner { padding-top: max(8px, env(safe-area-inset-top)); }
+  .toast { bottom: max(32px, calc(16px + env(safe-area-inset-bottom))); }
+}
