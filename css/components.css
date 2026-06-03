@@ -1506,3 +1506,74 @@ body:not(.fc-auth-signed-in) .btn-logout { display: none; }
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+/* --- Onboarding-Overlay --- */
+.onboarding-card { max-width: 480px; }
+.onboarding-kicker {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.onboarding-title {
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 500;
+  color: var(--text);
+  margin: 0 0 16px;
+  line-height: 1.1;
+}
+.onboarding-intro {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--text2);
+  margin: 0 0 22px;
+}
+.onboarding-tabs {
+  list-style: none;
+  margin: 0 0 26px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.onboarding-tabs li {
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text2);
+  padding-left: 14px;
+  border-left: 2px solid var(--border2);
+}
+.ob-tab {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+.onboarding-btn {
+  width: 100%;
+  height: 46px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--bg);
+  background: var(--accent);
+  border: var(--hair) solid var(--accent);
+  border-radius: 0;
+  cursor: pointer;
+  transition: all 240ms var(--ease);
+}
+.onboarding-btn:hover {
+  background: var(--accent-2);
+  border-color: var(--accent-2);
+}

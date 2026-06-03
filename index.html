@@ -189,6 +189,28 @@
   </div>
 </div>
 
+<!-- ============================================================
+     ONBOARDING-OVERLAY (einmalig beim ersten Login)
+     ============================================================ -->
+<div class="modal-backdrop" id="onboarding-overlay" aria-hidden="true">
+  <div class="modal-card onboarding-card" role="dialog" aria-modal="true" aria-labelledby="onboarding-title">
+    <div class="onboarding-kicker">Willkommen</div>
+    <h2 id="onboarding-title" class="onboarding-title">Dein Finanz-Cockpit</h2>
+    <p class="onboarding-intro">
+      Alles auf einen Blick — vier Bereiche, ein klarer Überblick über dein Geld.
+      Die angezeigten Beträge sind <strong>Beispielwerte</strong>; tippe auf das
+      ✎-Symbol, um sie an deine Situation anzupassen.
+    </p>
+    <ul class="onboarding-tabs">
+      <li><span class="ob-tab">Zahlungen</span> Einnahmen &amp; Fixausgaben pro Monat abhaken, Überschuss verfolgen.</li>
+      <li><span class="ob-tab">Haushalt</span> Vermögen, Sparziele, Barreserve &amp; Kredit im Blick.</li>
+      <li><span class="ob-tab">Routine</span> Deine monatliche Finanz-Checkliste.</li>
+      <li><span class="ob-tab">Finanztipps</span> Allgemeine Empfehlungen — annehmen oder verwerfen.</li>
+    </ul>
+    <button class="onboarding-btn" id="onboarding-start" type="button">Los geht's</button>
+  </div>
+</div>
+
 <div class="offline-banner" id="offline-banner" role="status">
   ⚠ Keine Verbindung — Änderungen werden gerade nicht gespeichert
 </div>

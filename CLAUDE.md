@@ -114,6 +114,7 @@ Beim ersten Schreiben in einen Monat wird ein Schnappschuss der aktuellen Positi
 |---|---|
 | `fc-theme` | `"dark"` / `"light"` — sofortiges Theme-Match vor Login |
 | `fc-collapsed` | Klapp-Zustand der Haushalt-Boxen pro Browser |
+| `fc-onboarded-<userId>` | Flag: Willkommens-Overlay für diesen User schon gesehen (per-Device) |
 
 Diese werden absichtlich nicht (sofort) auf `user_preferences` synchronisiert — beides ist Device-spezifisch.
 
@@ -172,6 +173,8 @@ Alle Setter sind **optimistic**: Cache wird sofort aktualisiert + `render()` lä
 - Neuen Tab hinzufügen: `<div class="tab" onclick="showTab('name',this)">` im Topnav + `<div id="tab-name" class="page">` im Container.
 - Theme-Farbe ändern: `css/base.css` → `:root` bzw. `[data-theme="light"]`.
 - Auth-Flow anpassen: `js/auth.js` (`enterApp`/`leaveApp`, `screens.*` Form-Handler).
+- Onboarding-Overlay anpassen: `index.html` (`#onboarding-overlay`) + `js/auth.js` (`maybeShowOnboarding`/`dismissOnboarding`, getriggert in `enterApp` nach dem ersten erfolgreichen Login).
+- Konto-Modal / Account-Löschung: `index.html` (`#account-modal`) + `js/auth.js` (Modal-Handler + `supabase.functions.invoke("delete-account")`).
 
 ---
 

@@ -166,6 +166,7 @@ async function enterApp(session) {
     clearTimeout(hintTimer);
     if (typeof window.fcRenderAll === "function") window.fcRenderAll();
     setBodyState("signed-in");
+    maybeShowOnboarding(session.user.id);
   } catch (e) {
     clearTimeout(hintTimer);
     console.error("[auth] enterApp failed:", e);
@@ -407,6 +408,47 @@ if (deleteConfirmInput && deleteBtn) {
       deleteConfirmInput.value.trim().toUpperCase() !== DELETE_CONFIRM_WORD;
   });
 }
+
+/* ============================================================
+   ONBOARDING — einmaliges Willkommens-Overlay
+   ============================================================
+   Pro Account einmal (localStorage-Flag mit User-ID). Bewusst
+   per-Device: ein neuer Browser zeigt die Intro erneut — als
+   UI-Nicety völlig ok, kein kritischer State (vgl. fc-theme). */
+const onboardingOverlay = document.getElementById("onboarding-overlay");
+const onboardingStart   = document.getElementById("onboarding-start");
+
+function _onboardingKey(userId) {
+  return "fc-onboarded-" + userId;
+}
+
+function maybeShowOnboarding(userId) {
+  if (!onboardingOverlay || !userId) return;
+  try {
+    if (localStorage.getItem(_onboardingKey(userId))) return;
+  } catch (_) {
+    /* localStorage gesperrt (Privatmodus) — dann zeigen wir es halt. */
+  }
+  onboardingOverlay.dataset.userId = userId;
+  onboardingOverlay.classList.add("open");
+  onboardingOverlay.setAttribute("aria-hidden", "false");
+}
+
+function dismissOnboarding() {
+  if (!onboardingOverlay) return;
+  const userId = onboardingOverlay.dataset.userId;
+  if (userId) {
+    try {
+      localStorage.setItem(_onboardingKey(userId), "1");
+    } catch (_) {
+      /* ignoriert — dann erscheint es beim nächsten Login wieder. */
+    }
+  }
+  onboardingOverlay.classList.remove("open");
+  onboardingOverlay.setAttribute("aria-hidden", "true");
+}
+
+if (onboardingStart) onboardingStart.addEventListener("click", dismissOnboarding);
 
 if (deleteBtn) {
   deleteBtn.addEventListener("click", async () => {
