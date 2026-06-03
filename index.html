@@ -4,9 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Finanz-Cockpit</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/components.css">
@@ -397,6 +395,9 @@
      supabase-client.js läuft als ES-Modul (deferred), schreibt sich
      selbst auf window.supabase nach DOM-Ready.
      ============================================================ -->
+<!-- Supabase-JS lokal (UMD-Bundle, setzt window.supabase als Library-Namespace).
+     Klassisches Script → läuft VOR den deferred ES-Modulen unten. -->
+<script src="js/vendor/supabase-js@2.39.8.umd.js"></script>
 <script src="js/data.js"></script>
 <script src="js/state.js"></script>
 <script src="js/render.js"></script>

@@ -11,10 +11,22 @@
    Wichtig: diese Datei MUSS über einen HTTP-Server geladen werden,
             nicht per file:// (ES-Module brauchen CORS).
             Lokal: `python -m http.server 8765`
+
+   createClient kommt aus dem lokal eingebundenen UMD-Bundle
+   (js/vendor/supabase-js@*.umd.js), das window.supabase als
+   Library-Namespace setzt — geladen als klassisches Script VOR
+   diesem Modul. Keine CDN-Abhängigkeit mehr zur Laufzeit.
    ============================================================ */
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js";
+
+const _sbLib = window.supabase;
+if (!_sbLib || typeof _sbLib.createClient !== "function") {
+  console.error(
+    "[Supabase] UMD-Bundle nicht geladen — fehlt das <script src=\"js/vendor/supabase-js@*.umd.js\"> vor den Modulen in index.html?",
+  );
+}
+const createClient = _sbLib.createClient;
 
 if (
   !SUPABASE_URL ||

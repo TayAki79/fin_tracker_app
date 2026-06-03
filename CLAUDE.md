@@ -6,10 +6,10 @@ Finanz-Tracker (auf Deutsch). **Multi-User-SaaS in Phase 1.** Aktueller Zustand:
 
 - **HTML + CSS + Vanilla JavaScript** — kein Build, keine npm-Dependencies
 - **Supabase** (Postgres + Auth, EU-Region Frankfurt) — Schema-Doku in `docs/supabase-schema.md`, SQL in `supabase/`
-- **Google Fonts** (Fraunces, Bricolage Grotesque, JetBrains Mono) via CDN
-- **Supabase JS Client** via ESM-CDN (`https://esm.sh/@supabase/supabase-js@2`) — die einzigen Modul-Scripte
+- **Fonts lokal selbst gehostet** (Fraunces, Bricolage Grotesque, JetBrains Mono) — `css/fonts.css` + `assets/fonts/*.woff2` (Subsets latin + latin-ext für DE/EN). Keine Google-Fonts-CDN zur Laufzeit.
+- **Supabase JS Client** lokal als UMD-Bundle (`js/vendor/supabase-js@2.39.8.umd.js`) — setzt `window.supabase` als Library-Namespace, keine ESM-CDN-Abhängigkeit mehr. `supabase-client.js` + `auth.js` bleiben die einzigen ES-Module und lesen `createClient` aus dem UMD-Global.
 
-Vanilla bleibt — solange es trägt. Build-Step wird eingeführt, wenn die Komplexität es zwingt.
+Vanilla bleibt — solange es trägt. Build-Step wird eingeführt, wenn die Komplexität es zwingt. **Phase 2: keine externen Laufzeit-Abhängigkeiten im Frontend** mehr (Vorbereitung fürs Capacitor-Wrapping). Ausnahme: die Edge Function `delete-account` importiert serverseitig (Deno) weiter von esm.sh — das ist kein Client-Runtime-Concern.
 
 ## Lokale Entwicklung
 
@@ -37,8 +37,10 @@ fin_tracker_web/
 │   └── workflows/
 │       └── supabase-keepalive.yml  # Cron-Ping alle 4h gegen Free-Tier-Schlaf
 ├── assets/
-│   └── logo.svg            # (aktuell per CSS ausgeblendet)
+│   ├── logo.svg            # (aktuell per CSS ausgeblendet)
+│   └── fonts/              # Lokale woff2 (Fraunces, Bricolage, JetBrains Mono)
 ├── css/
+│   ├── fonts.css           # @font-face für die lokalen woff2 (latin + latin-ext)
 │   ├── base.css            # CSS-Variablen, Themes, Typografie, Atmosphäre
 │   ├── layout.css          # Topbar, Container, Grids, Tabs, Navigation
 │   └── components.css      # Buttons, Panels, Rows, Inputs, Auth-Gate, alle UI-Elemente
@@ -55,6 +57,8 @@ fin_tracker_web/
 │           ├── index.ts                # Deno-Function: admin.deleteUser(self)
 │           └── README.md               # Deploy-Anleitung (supabase functions deploy)
 └── js/                     # Reihenfolge in index.html ist KRITISCH
+    ├── vendor/
+    │   └── supabase-js@2.39.8.umd.js  # Lokales Supabase-Bundle (window.supabase-Library)
     ├── data.js             # Statische Inhalte (MONTHS, TIPS_DATA, CAT)
     ├── state.js            # Supabase-backed In-Memory-Cache (window.stateBootstrap/Teardown)
     ├── render.js           # DOM-Rendering für Zahlungen, Routine, Tipps
@@ -69,6 +73,7 @@ fin_tracker_web/
 ## Script-Reihenfolge
 
 ```html
+<script src="js/vendor/supabase-js@2.39.8.umd.js"></script>
 <script src="js/data.js"></script>
 <script src="js/state.js"></script>
 <script src="js/render.js"></script>
@@ -78,7 +83,7 @@ fin_tracker_web/
 <script type="module" src="js/auth.js"></script>
 ```
 
-Die fünf non-module Skripte definieren Funktionen am `window`-Objekt. Die beiden ES-Module laufen deferred danach. `auth.js` ruft nach erfolgreichem Login `window.stateBootstrap(userId)` auf, lädt damit alle Cache-Daten aus Supabase, und triggert dann `window.fcRenderAll()`. Vor dem Bootstrap wird **nichts** gerendert — die App-DOM bleibt durch die `body.fc-auth-loading`/`fc-auth-signed-out` CSS-Regeln versteckt.
+Das UMD-Bundle (klassisches Script) läuft als erstes und setzt `window.supabase` als Library-Namespace. Die fünf non-module App-Skripte definieren Funktionen am `window`-Objekt. Die beiden ES-Module laufen deferred danach — `supabase-client.js` liest `createClient` aus dem UMD-Global und ersetzt `window.supabase` durch die Client-Instanz. `auth.js` ruft nach erfolgreichem Login `window.stateBootstrap(userId)` auf, lädt damit alle Cache-Daten aus Supabase, und triggert dann `window.fcRenderAll()`. Vor dem Bootstrap wird **nichts** gerendert — die App-DOM bleibt durch die `body.fc-auth-loading`/`fc-auth-signed-out` CSS-Regeln versteckt.
 
 ## Die vier Tabs
 
@@ -174,6 +179,8 @@ Alle Setter sind **optimistic**: Cache wird sofort aktualisiert + `render()` lä
 - Neuen Tab hinzufügen: `<div class="tab" onclick="showTab('name',this)">` im Topnav + `<div id="tab-name" class="page">` im Container.
 - Theme-Farbe ändern: `css/base.css` → `:root` bzw. `[data-theme="light"]`.
 - Auth-Flow anpassen: `js/auth.js` (`enterApp`/`leaveApp`, `screens.*` Form-Handler).
+- **Supabase-JS aktualisieren**: neues UMD-Bundle laden (`https://cdn.jsdelivr.net/npm/@supabase/supabase-js@<ver>/dist/umd/supabase.js`) → `js/vendor/` ablegen, alten löschen, Dateinamen im `<script>`-Tag (index.html) + Doku anpassen. Muss self-contained sein (keine `import`/`/npm`-Statements).
+- **Fonts aktualisieren**: Google-`css2`-URL mit Browser-User-Agent holen (liefert woff2), nur `latin` + `latin-ext` Blöcke behalten, woff2 nach `assets/fonts/`, `url()` auf `../assets/fonts/<datei>` umschreiben → `css/fonts.css`.
 - Onboarding-Overlay anpassen: `index.html` (`#onboarding-overlay`) + `js/auth.js` (`maybeShowOnboarding`/`dismissOnboarding`, getriggert in `enterApp` nach dem ersten erfolgreichen Login).
 - Konto-Modal / Account-Löschung: `index.html` (`#account-modal`) + `js/auth.js` (Modal-Handler + `supabase.functions.invoke("delete-account")`).
 
