@@ -23,11 +23,18 @@ python -m http.server 8765
 
 Vor erstem Start: `js/config.example.js` nach `js/config.js` kopieren und Supabase-Credentials eintragen. `js/config.js` ist gitignored.
 
+## Betrieb / Infrastruktur
+
+- **Supabase Keep-Alive** (`.github/workflows/supabase-keepalive.yml`): GitHub Action, die alle 4 Stunden die REST-API gegen `profiles` pingt. Das Supabase-Free-Tier-Projekt pausiert nach 7 Tagen Inaktivität (→ 30–60 s Cold-Start); der Cron-Ping hält es dauerhaft wach. Braucht die Repo-Secrets `SUPABASE_URL` + `SUPABASE_ANON_KEY` (nur Anon-Key, kein `service_role`). HTTP 200 **oder** 401 gelten als Erfolg — beide bedeuten, dass die Query durch Postgres lief.
+
 ## Projektstruktur
 
 ```
 fin_tracker_web/
 ├── index.html              # Einzige HTML-Datei, enthält Auth-Gate + alle 4 Tabs
+├── .github/
+│   └── workflows/
+│       └── supabase-keepalive.yml  # Cron-Ping alle 4h gegen Free-Tier-Schlaf
 ├── assets/
 │   └── logo.svg            # (aktuell per CSS ausgeblendet)
 ├── css/
@@ -71,7 +78,7 @@ Die fünf non-module Skripte definieren Funktionen am `window`-Objekt. Die beide
 
 | Tab | Inhalt |
 |-----|--------|
-| **Zahlungen** | Einnahmen + Fixausgaben pro Monat abhaken, Beträge & Namen inline editierbar, Extra-Einnahmen hinzufügbar, Fortschrittsbalken, kumulierter Überschuss |
+| **Zahlungen** | Einnahmen + Fixausgaben pro Monat abhaken, Beträge & Namen inline editierbar, Extra-Einnahmen hinzufügbar, Fortschrittsbalken, kumulierter Überschuss + **Monatsübertrag** (Kum-Box zeigt Plan-Überschuss vs. Ist-Eingabe + Differenz) |
 | **Haushalt** | 3×n Grid mit klappbaren Boxen: Vermögen, Monatsrechnung (sync mit Zahlungen), Kredit · Ziel Barreserve, Ziel Notfallkonto |
 | **Routine** | Monatscheckliste (per User, default 7 Punkte aus dem Signup-Bootstrap) |
 | **Finanztipps** | Allgemeine Empfehlungen (statisch in `data.js → TIPS_DATA`), annehmbar/verwerfbar, Archiv |
@@ -152,6 +159,7 @@ Alle Setter sind **optimistic**: Cache wird sofort aktualisiert + `render()` lä
 
 - Default-Positionen/Routinen ändern: `supabase/etappe-c-bootstrap.sql` (greift nur für neue User).
 - Berechnung Überschuss anpassen: `js/haushalt.js` → `updateHaushalt()` (Monatsrechnung-Posten werden aus `getIncome()`/`getExpenses()` + Extras gespiegelt, plus Haushalt-eigene `hh_spar` & `hh_var`).
+- Monatsübertrag / Plan-Überschuss anpassen: `js/render.js` → `renderKumBox()` + `calcPlanSurplus()` (Plan = monatliche Einnahmen − Ausgaben, yearly/quarterly anteilig; Ist kommt aus `monthly_states.surplus_actual`, Differenz = Ist − Plan).
 - Neuen Tab hinzufügen: `<div class="tab" onclick="showTab('name',this)">` im Topnav + `<div id="tab-name" class="page">` im Container.
 - Theme-Farbe ändern: `css/base.css` → `:root` bzw. `[data-theme="light"]`.
 - Auth-Flow anpassen: `js/auth.js` (`enterApp`/`leaveApp`, `screens.*` Form-Handler).
