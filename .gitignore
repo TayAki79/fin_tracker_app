@@ -20,8 +20,10 @@ localstorage-*.json
 secrets/
 credentials.json
 
-# Lokale Supabase-Credentials (Project-URL + anon key)
-js/config.js
+# Hinweis: js/config.js wird BEWUSST committet (für Git-Deploy auf Hostinger).
+# Sie enthält nur Project-URL + anon-Key — beide public-safe (RLS schützt die
+# Daten, der Key steht ohnehin im ausgelieferten Browser-Code). Der gefährliche
+# service_role-Key gehört NIEMALS hierher (nur in Edge Functions).
 
 # ============================================================
 #  Editor / IDE

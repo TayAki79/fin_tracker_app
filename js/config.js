@@ -1,0 +1,3 @@
+export const SUPABASE_URL = "https://acvivpxlpopsswntvmbf.supabase.co";
+export const SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFjdml2cHhscG9wc3N3bnR2bWJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MjQ5NDUsImV4cCI6MjA5NTMwMDk0NX0.40WhL7ym0GZ9qxIEldtrG1bwTn1vhXw1u_UAVHyNTms";

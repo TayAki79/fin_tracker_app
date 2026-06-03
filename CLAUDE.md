@@ -21,14 +21,14 @@ python -m http.server 8765
 # dann http://localhost:8765 öffnen
 ```
 
-Vor erstem Start: `js/config.example.js` nach `js/config.js` kopieren und Supabase-Credentials eintragen. `js/config.js` ist gitignored.
+Vor erstem Start: `js/config.example.js` nach `js/config.js` kopieren und Supabase-Credentials eintragen. **`js/config.js` ist committet** (nötig fürs Git-Deploy, s. „Was NICHT tun") — enthält nur Project-URL + anon-Key (public-safe).
 
 ## Betrieb / Infrastruktur
 
 - **Supabase Keep-Alive** (`.github/workflows/supabase-keepalive.yml`): GitHub Action, die alle 4 Stunden die REST-API gegen `profiles` pingt. Das Supabase-Free-Tier-Projekt pausiert nach 7 Tagen Inaktivität (→ 30–60 s Cold-Start); der Cron-Ping hält es dauerhaft wach. Braucht die Repo-Secrets `SUPABASE_URL` + `SUPABASE_ANON_KEY` (nur Anon-Key, kein `service_role`). HTTP 200 **oder** 401 gelten als Erfolg — beide bedeuten, dass die Query durch Postgres lief.
 - **Edge Functions** (`supabase/functions/`): Deno-Functions für alles, was den `service_role`-Key braucht. Aktuell: `delete-account` (in-App Konto-Löschung, DSGVO + Apple-Pflicht). Deployment je Function via `supabase functions deploy <name>` — Details im jeweiligen `README.md`. Secrets (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`) injiziert Supabase automatisch. Frontend ruft sie via `supabase.functions.invoke(...)` mit dem User-JWT — die Function leitet die `user.id` aus dem Token ab, nie aus dem Body. **Erst nach Deployment funktioniert der „Konto löschen"-Flow** (User-Chip oben rechts → Konto → Gefahrenzone).
 - **E-Mail-Versand / SMTP** (Auth-Mails): Custom SMTP über **Mailtrap Email Sending** (Transactional Stream), konfiguriert in Supabase → *Authentication → SMTP Settings*. Absender **`no-reply@akradev.de`**, Name **Finanz-Cockpit**; Host `live.smtp.mailtrap.io:587`, User `api`, Password = Mailtrap-**API-Token** (Geheimnis, nur im Supabase-Feld — nie ins Repo). Domain `akradev.de` ist in Mailtrap per DNS (SPF/DKIM in der Hostinger-DNS-Zone) **verifiziert**. Ersetzt den Supabase-Default-Absender. ⚠️ Mailtraps „Sender Information" (Pflicht-Postadresse, Anti-Spam-Recht) enthält **vorerst eine private Adresse** — **vor der Closed Beta auf eine ladungsfähige Geschäftsadresse wechseln** (gilt auch fürs Impressum, Phase 3).
-- **Deployment / Hosting** (Phase 2.5): Static-Hosting auf **Hostinger**, Domain **`akradev.de`** (vorerst privates Staging/Test). Frontend-Dateien liegen in `public_html`. Quelle ist GitHub (Git-Deploy). **Drei Konfig-Punkte, die NICHT im Repo stehen und manuell auf dem Server/in Supabase gesetzt werden:** (1) `js/config.js` (gitignored) muss auf dem Server existieren; (2) in Supabase unter *Authentication → URL Configuration* müssen **Site URL** + **Redirect URLs** die Produktions-Domain `https://akradev.de` enthalten, sonst zeigen Verify-/Reset-Mails auf localhost; (3) HTTPS/SSL für die Domain aktiv. `service_role`-Key und `supabase/`-SQL gehören NICHT auf den Webserver.
+- **Deployment / Hosting** (Phase 2.5): Static-Hosting auf **Hostinger**, Domain **`akradev.de`** (vorerst privates Staging/Test). Frontend-Dateien liegen in `public_html`. Quelle ist GitHub (Git-Deploy). **Konfig-Punkte:** (1) `js/config.js` ist **committet** (nur URL + anon-Key, public-safe) und wird so vom Git-Deploy automatisch ausgerollt — kein manuelles Anlegen mehr nötig (untracked Dateien überleben den Deploy-Checkout nicht); (2) in Supabase unter *Authentication → URL Configuration* müssen **Site URL** + **Redirect URLs** die Produktions-Domain `https://akradev.de` enthalten, sonst zeigen Verify-/Reset-Mails auf localhost; (3) HTTPS/SSL für die Domain aktiv. `service_role`-Key und `supabase/`-SQL gehören NICHT auf den Webserver.
 
 ## Projektstruktur
 
@@ -67,7 +67,7 @@ fin_tracker_web/
     ├── haushalt.js         # Haushalt-Tab: Vermögen, Monatsrechnung, Barreserve, Kredit
     ├── app.js              # Init, Theme-Toggle, Tab-Switching, Datum, Issue-Nummer
     ├── config.example.js   # Vorlage für Supabase-Credentials (committed)
-    ├── config.js           # echte Credentials — GITIGNORED
+    ├── config.js           # echte Credentials (URL + anon-Key) — COMMITTED (public-safe, fürs Git-Deploy)
     ├── supabase-client.js  # ES-Modul: erzeugt window.supabase
     └── auth.js             # ES-Modul: Auth-Gate-Logik (Login/Register/Reset) + Bootstrap-Trigger
 ```
@@ -162,7 +162,7 @@ Alle Setter sind **optimistic**: Cache wird sofort aktualisiert + `render()` lä
 - **Keinen Build-Schritt einführen** — solange CDN-Imports reichen.
 - **Default-Werte ändern** im Signup-Bootstrap-Trigger (`supabase/etappe-c-bootstrap.sql`) ohne Migrations-Plan — bestehende User behalten ihre Daten, neue User bekommen die neuen Defaults; Inkonsistenz möglich.
 - **Script-Reihenfolge in `index.html`** nicht umstellen.
-- **`js/config.js` niemals committen** — enthält Supabase-Credentials. Ist in `.gitignore`.
+- **`js/config.js` enthält NUR Project-URL + anon-Key** — die sind public-safe (RLS schützt die Daten; der Key steht ohnehin im ausgelieferten Browser-Code) und werden **bewusst committet**, damit der Git-Deploy auf Hostinger sie mit ausrollt (untracked Dateien überleben den Deploy-Checkout nicht). **Der `service_role`-Key gehört NIEMALS hierher** — nur in Edge Functions.
 - **`service_role`-Key niemals ins Frontend** — gehört ausschließlich in Supabase Edge Functions.
 - **Personenbezogene Daten** in `data.js` (oder anderswo im Code) hinterlegen — alles Konkrete gehört ins Backend.
 
