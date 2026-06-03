@@ -1273,13 +1273,18 @@ body:not(.fc-auth-signed-in) .btn-logout { display: none; }
   color: var(--text2);
   padding: 0 12px 0 0;
   margin-right: 4px;
+  border: none;
   border-right: var(--hair) solid var(--border);
+  background: transparent;
+  cursor: pointer;
   height: 32px;
   max-width: 220px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: color 240ms var(--ease);
 }
+.user-chip:hover { color: var(--text); }
 .user-chip-dot {
   width: 6px;
   height: 6px;
@@ -1315,4 +1320,166 @@ body:not(.fc-auth-signed-in) .btn-logout { display: none; }
   line-height: 1.6;
   text-align: center;
   letter-spacing: 0.005em;
+}
+
+/* ============================================================
+   MODAL (Konto verwalten) + Gefahrenzone
+   ============================================================ */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.modal-backdrop.open { display: flex; }
+
+.modal-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--bg2);
+  border: var(--hair) solid var(--border2);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+  padding: 28px;
+  animation: modal-rise 280ms var(--ease-out);
+}
+@keyframes modal-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.modal-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.modal-head h2 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--text);
+  margin: 0;
+}
+.modal-close {
+  background: transparent;
+  border: none;
+  color: var(--text3);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+  transition: color 240ms var(--ease);
+}
+.modal-close:hover { color: var(--text); }
+
+.modal-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 20px;
+  border-bottom: var(--hair) solid var(--border);
+}
+.modal-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+.modal-value {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.danger-zone {
+  margin-top: 24px;
+  padding: 20px;
+  border: var(--hair) solid color-mix(in srgb, var(--red) 40%, var(--border));
+  background: color-mix(in srgb, var(--red) 5%, transparent);
+}
+.danger-zone h3 {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--red);
+  margin: 0 0 10px;
+}
+.danger-zone p {
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text2);
+  margin: 0 0 16px;
+}
+.danger-confirm-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--text2);
+  margin-bottom: 8px;
+}
+.danger-confirm-label strong { color: var(--red); letter-spacing: 0.12em; }
+
+#account-delete-confirm {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  color: var(--text);
+  background: var(--bg);
+  border: var(--hair) solid var(--border2);
+  border-radius: 0;
+  margin-bottom: 12px;
+  transition: border-color 240ms var(--ease);
+}
+#account-delete-confirm:focus {
+  outline: none;
+  border-color: var(--red);
+}
+
+.danger-error {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--red);
+  min-height: 16px;
+  margin-bottom: 8px;
+}
+
+.danger-btn {
+  width: 100%;
+  height: 42px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--red);
+  background: transparent;
+  border: var(--hair) solid var(--red);
+  border-radius: 0;
+  cursor: pointer;
+  transition: all 240ms var(--ease);
+}
+.danger-btn:hover:not(:disabled) {
+  background: var(--red);
+  color: var(--bg);
+}
+.danger-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }

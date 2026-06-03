@@ -140,12 +140,52 @@
     <h1>Finanz<span class="amp">·</span>Cockpit</h1>
   </div>
   <div class="topbar-right">
-    <span class="user-chip" id="user-chip" title="Angemeldet">
+    <button class="user-chip" id="user-chip" type="button" title="Konto verwalten">
       <span class="user-chip-dot"></span>
       <span id="user-email"></span>
-    </span>
+    </button>
     <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
     <button class="io-btn btn-logout" id="logoutBtn">Abmelden</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     KONTO-MODAL (Account verwalten + Gefahrenzone)
+     ============================================================ -->
+<div class="modal-backdrop" id="account-modal" aria-hidden="true">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="account-modal-title">
+    <div class="modal-head">
+      <h2 id="account-modal-title">Konto</h2>
+      <button class="modal-close" id="account-modal-close" type="button" aria-label="Schließen">×</button>
+    </div>
+
+    <div class="modal-row">
+      <span class="modal-label">Angemeldet als</span>
+      <span class="modal-value" id="account-modal-email"></span>
+    </div>
+
+    <div class="danger-zone">
+      <h3>Gefahrenzone</h3>
+      <p>
+        Konto unwiderruflich löschen. Alle deine Daten — Vermögen, Zahlungen,
+        Routinen, Tipps — werden sofort und endgültig entfernt. Das kann
+        <strong>nicht</strong> rückgängig gemacht werden.
+      </p>
+      <label class="danger-confirm-label" for="account-delete-confirm">
+        Zum Bestätigen <strong>LÖSCHEN</strong> eintippen:
+      </label>
+      <input
+        id="account-delete-confirm"
+        type="text"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="LÖSCHEN"
+      >
+      <div class="danger-error" id="account-delete-error"></div>
+      <button class="danger-btn" id="account-delete-btn" type="button" disabled>
+        Konto endgültig löschen
+      </button>
+    </div>
   </div>
 </div>
 

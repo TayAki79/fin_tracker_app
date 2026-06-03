@@ -348,3 +348,97 @@ if (logoutBtn) {
     /* onAuthStateChange schaltet auf signed-out + Login-Screen */
   });
 }
+
+/* ============================================================
+   KONTO-MODAL + Account-Löschung
+   ============================================================
+   Die eigentliche Löschung läuft serverseitig in der Edge
+   Function „delete-account" (service_role bleibt im Backend).
+   Der Client schickt nur sein JWT mit; die Function leitet die
+   user.id daraus ab — eine fremde id ist nicht erzwingbar. */
+const DELETE_CONFIRM_WORD = "LÖSCHEN";
+const accountModal       = document.getElementById("account-modal");
+const accountModalEmail  = document.getElementById("account-modal-email");
+const accountModalClose  = document.getElementById("account-modal-close");
+const userChip           = document.getElementById("user-chip");
+const deleteConfirmInput = document.getElementById("account-delete-confirm");
+const deleteBtn          = document.getElementById("account-delete-btn");
+const deleteError        = document.getElementById("account-delete-error");
+
+function openAccountModal() {
+  if (!accountModal) return;
+  if (accountModalEmail) {
+    const el = document.getElementById("user-email");
+    accountModalEmail.textContent = el ? el.textContent : "";
+  }
+  if (deleteConfirmInput) deleteConfirmInput.value = "";
+  if (deleteError) deleteError.textContent = "";
+  if (deleteBtn) {
+    deleteBtn.disabled = true;
+    deleteBtn.textContent = "Konto endgültig löschen";
+  }
+  accountModal.classList.add("open");
+  accountModal.setAttribute("aria-hidden", "false");
+}
+
+function closeAccountModal() {
+  if (!accountModal) return;
+  accountModal.classList.remove("open");
+  accountModal.setAttribute("aria-hidden", "true");
+}
+
+if (userChip) userChip.addEventListener("click", openAccountModal);
+if (accountModalClose) accountModalClose.addEventListener("click", closeAccountModal);
+if (accountModal) {
+  accountModal.addEventListener("click", (e) => {
+    if (e.target === accountModal) closeAccountModal();
+  });
+}
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && accountModal?.classList.contains("open")) {
+    closeAccountModal();
+  }
+});
+
+/* Lösch-Button erst freischalten, wenn das Bestätigungswort exakt passt. */
+if (deleteConfirmInput && deleteBtn) {
+  deleteConfirmInput.addEventListener("input", () => {
+    deleteBtn.disabled =
+      deleteConfirmInput.value.trim().toUpperCase() !== DELETE_CONFIRM_WORD;
+  });
+}
+
+if (deleteBtn) {
+  deleteBtn.addEventListener("click", async () => {
+    if (deleteConfirmInput.value.trim().toUpperCase() !== DELETE_CONFIRM_WORD) return;
+    deleteBtn.disabled = true;
+    deleteBtn.textContent = "Wird gelöscht …";
+    if (deleteError) deleteError.textContent = "";
+
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-account", {
+        method: "POST",
+      });
+      if (error || !data?.success) {
+        throw new Error(
+          error?.message || data?.error || "Konto konnte nicht gelöscht werden",
+        );
+      }
+      /* Lokal abmelden (kein Server-Call nötig — User existiert nicht mehr).
+         SIGNED_OUT-Event triggert leaveApp() → Login-Screen. */
+      await supabase.auth.signOut({ scope: "local" });
+      closeAccountModal();
+      if (typeof window.showToast === "function") {
+        window.showToast("Konto gelöscht. Alles Gute! 👋");
+      }
+    } catch (e) {
+      console.error("[auth] Account-Löschung fehlgeschlagen:", e);
+      if (deleteError) {
+        deleteError.textContent =
+          "Löschung fehlgeschlagen — bitte später erneut versuchen.";
+      }
+      deleteBtn.disabled = false;
+      deleteBtn.textContent = "Konto endgültig löschen";
+    }
+  });
+}

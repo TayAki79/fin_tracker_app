@@ -26,6 +26,7 @@ Vor erstem Start: `js/config.example.js` nach `js/config.js` kopieren und Supaba
 ## Betrieb / Infrastruktur
 
 - **Supabase Keep-Alive** (`.github/workflows/supabase-keepalive.yml`): GitHub Action, die alle 4 Stunden die REST-API gegen `profiles` pingt. Das Supabase-Free-Tier-Projekt pausiert nach 7 Tagen Inaktivität (→ 30–60 s Cold-Start); der Cron-Ping hält es dauerhaft wach. Braucht die Repo-Secrets `SUPABASE_URL` + `SUPABASE_ANON_KEY` (nur Anon-Key, kein `service_role`). HTTP 200 **oder** 401 gelten als Erfolg — beide bedeuten, dass die Query durch Postgres lief.
+- **Edge Functions** (`supabase/functions/`): Deno-Functions für alles, was den `service_role`-Key braucht. Aktuell: `delete-account` (in-App Konto-Löschung, DSGVO + Apple-Pflicht). Deployment je Function via `supabase functions deploy <name>` — Details im jeweiligen `README.md`. Secrets (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`) injiziert Supabase automatisch. Frontend ruft sie via `supabase.functions.invoke(...)` mit dem User-JWT — die Function leitet die `user.id` aus dem Token ab, nie aus dem Body. **Erst nach Deployment funktioniert der „Konto löschen"-Flow** (User-Chip oben rechts → Konto → Gefahrenzone).
 
 ## Projektstruktur
 
@@ -48,7 +49,11 @@ fin_tracker_web/
 │   ├── etappe-b-rls.sql               # Row-Level-Security-Policies
 │   ├── etappe-c-bootstrap.sql         # Signup-Trigger (Auto-Bootstrap neuer User)
 │   ├── etappe-d-positions-snapshot.sql # positions_snapshot-Spalte für monthly_states
-│   └── etappe-e-rls-audit.sql          # Read-only RLS-Verifikation (Isolation beweisen)
+│   ├── etappe-e-rls-audit.sql          # Read-only RLS-Verifikation (Isolation beweisen)
+│   └── functions/
+│       └── delete-account/             # Edge Function: Konto-Löschung (service_role)
+│           ├── index.ts                # Deno-Function: admin.deleteUser(self)
+│           └── README.md               # Deploy-Anleitung (supabase functions deploy)
 └── js/                     # Reihenfolge in index.html ist KRITISCH
     ├── data.js             # Statische Inhalte (MONTHS, TIPS_DATA, CAT)
     ├── state.js            # Supabase-backed In-Memory-Cache (window.stateBootstrap/Teardown)
