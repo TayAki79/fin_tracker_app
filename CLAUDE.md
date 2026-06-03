@@ -27,6 +27,7 @@ Vor erstem Start: `js/config.example.js` nach `js/config.js` kopieren und Supaba
 
 - **Supabase Keep-Alive** (`.github/workflows/supabase-keepalive.yml`): GitHub Action, die alle 4 Stunden die REST-API gegen `profiles` pingt. Das Supabase-Free-Tier-Projekt pausiert nach 7 Tagen Inaktivität (→ 30–60 s Cold-Start); der Cron-Ping hält es dauerhaft wach. Braucht die Repo-Secrets `SUPABASE_URL` + `SUPABASE_ANON_KEY` (nur Anon-Key, kein `service_role`). HTTP 200 **oder** 401 gelten als Erfolg — beide bedeuten, dass die Query durch Postgres lief.
 - **Edge Functions** (`supabase/functions/`): Deno-Functions für alles, was den `service_role`-Key braucht. Aktuell: `delete-account` (in-App Konto-Löschung, DSGVO + Apple-Pflicht). Deployment je Function via `supabase functions deploy <name>` — Details im jeweiligen `README.md`. Secrets (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`) injiziert Supabase automatisch. Frontend ruft sie via `supabase.functions.invoke(...)` mit dem User-JWT — die Function leitet die `user.id` aus dem Token ab, nie aus dem Body. **Erst nach Deployment funktioniert der „Konto löschen"-Flow** (User-Chip oben rechts → Konto → Gefahrenzone).
+- **Deployment / Hosting** (Phase 2.5): Static-Hosting auf **Hostinger**, Domain **`akradev.de`** (vorerst privates Staging/Test). Frontend-Dateien liegen in `public_html`. Quelle ist GitHub (Git-Deploy). **Drei Konfig-Punkte, die NICHT im Repo stehen und manuell auf dem Server/in Supabase gesetzt werden:** (1) `js/config.js` (gitignored) muss auf dem Server existieren; (2) in Supabase unter *Authentication → URL Configuration* müssen **Site URL** + **Redirect URLs** die Produktions-Domain `https://akradev.de` enthalten, sonst zeigen Verify-/Reset-Mails auf localhost; (3) HTTPS/SSL für die Domain aktiv. `service_role`-Key und `supabase/`-SQL gehören NICHT auf den Webserver.
 
 ## Projektstruktur
 
@@ -194,7 +195,8 @@ Stack-Entscheidung für die App: **Capacitor** — verpackt die bestehende Vanil
 | Phase | Ziel (warum) | Kern-Schritte | Aufwand | Status |
 |---|---|---|---|---|
 | **1 — Fundament** | Multi-User-Basis | Supabase, Auth, RLS, 4 Tabs | — | ✅ erledigt |
-| **2 — Web-App härten** | Vom Prototyp zum stabilen Produkt | **RLS-Audit** (User A darf nie Daten von User B sehen) · Account-Löschung in-App (Apple-Pflicht) · Error-Handling · Empty-State/Onboarding · Mobile-Layout · CDN-Imports lokal ins Projekt holen | ~2–3 Wo | offen |
+| **2 — Web-App härten** | Vom Prototyp zum stabilen Produkt | **RLS-Audit** (User A darf nie Daten von User B sehen) · Account-Löschung in-App (Apple-Pflicht) · Error-Handling · Empty-State/Onboarding · Mobile-Layout · CDN-Imports lokal ins Projekt holen | ~2–3 Wo | ✅ erledigt (Tests bestanden) |
+| **2.5 — Go-Live (Staging)** | Live-URL als Voraussetzung für Phase 3+4 | Deployment auf Hostinger (`akradev.de`) via Git-Deploy · `config.js` auf Server · Supabase Auth-URLs (Site URL + Redirects) auf Produktions-Domain · HTTPS/SSL · Edge Function live | ~1–2 Tage | in Arbeit |
 | **3 — Recht & Landing** | Pflicht vor Veröffentlichung | Impressum · Datenschutz (DSGVO) · AGB · Support-URL · Landingpage | ~1 Wo | offen |
 | **4 — Closed Beta** | Validieren *bevor* App-Aufwand entsteht | 5–10 echte Tester · Feedback · Bugfixing | ~2–3 Wo (parallel) | offen |
 | **5 — Native Wrapping** | Beide Stores aus einer Codebasis | Capacitor einrichten · Android-Build (PC) · iOS-Build (Mac) · Test auf echten Geräten · Icon/Splash | ~1–2 Wo | offen |
