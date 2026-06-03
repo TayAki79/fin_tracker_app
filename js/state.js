@@ -71,10 +71,10 @@ async function stateBootstrap(userId) {
         } catch (e) {
           console.error("[state] local signOut failed:", e);
         }
-        showToast("⚠ Anmeldedaten abgelaufen — bitte neu einloggen");
+        showToast("⚠ Anmeldedaten abgelaufen — bitte neu einloggen", "error");
         return false;
       }
-      showToast("⚠ Daten konnten nicht geladen werden");
+      showToast("⚠ Daten konnten nicht geladen werden", "error");
       return false;
     }
 
@@ -117,7 +117,7 @@ async function stateBootstrap(userId) {
     return true;
   } catch (e) {
     console.error("[state] bootstrap failed:", e);
-    showToast("⚠ Verbindung fehlgeschlagen");
+    showToast("⚠ Verbindung fehlgeschlagen", "error");
     return false;
   }
 }
@@ -323,20 +323,35 @@ function getName(id, def) {
    Write-Accessors (optimistisch + async upsert)
    ============================================================ */
 
+/* Re-Render nach einem Rollback — der optimistisch gezeigte Wert war
+   falsch, das DOM muss zurück auf den Cache-Stand. */
+function _rerenderAll() {
+  if (typeof window.fcRenderAll === "function") window.fcRenderAll();
+  else if (typeof render === "function") render();
+}
+
 function setAmt(id, val) {
   if (id.startsWith("hh_")) {
     const col = _HH_COLUMN[id];
     if (!col || !_cache.household) return;
+    const prev = _cache.household[col];
     _cache.household[col] = val;
-    _upsertHouseholdField(col, val);
+    _upsertHouseholdField(col, val, () => {
+      _cache.household[col] = prev;
+      _rerenderAll();
+    });
     return;
   }
   if (id.startsWith("inc_") || id.startsWith("exp_")) {
     const posId = id.substring(4);
     const pos = _cache.positions.find((p) => p.id === posId);
     if (!pos) return;
+    const prev = pos.amount;
     pos.amount = val;
-    _updatePositionField(posId, { amount: val });
+    _updatePositionField(posId, { amount: val }, () => {
+      pos.amount = prev;
+      _rerenderAll();
+    });
   }
 }
 
@@ -345,8 +360,12 @@ function setName(id, val) {
     const posId = id.substring(4);
     const pos = _cache.positions.find((p) => p.id === posId);
     if (!pos) return;
+    const prev = pos.name;
     pos.name = val;
-    _updatePositionField(posId, { name: val });
+    _updatePositionField(posId, { name: val }, () => {
+      pos.name = prev;
+      _rerenderAll();
+    });
   }
 }
 
@@ -442,7 +461,7 @@ async function _addOneOff(kind, name, amount, inpNameId, inpAmtId) {
 
   if (error) {
     console.error("[state] one_off insert failed:", error);
-    showToast("⚠ Konnte nicht gespeichert werden");
+    showToast("⚠ Konnte nicht gespeichert werden", "error");
     _cache.oneOffEntries[key] = _cache.oneOffEntries[key].filter((e) => e.id !== tempId);
     render();
     return;
@@ -474,7 +493,7 @@ async function _deleteOneOff(id) {
   const { error } = await window.supabase.from("one_off_entries").delete().eq("id", id);
   if (error) {
     console.error("[state] one_off delete failed:", error);
-    showToast("⚠ Konnte nicht gelöscht werden");
+    showToast("⚠ Konnte nicht gelöscht werden", "error");
     _cache.oneOffEntries[key] = before;
     render();
   }
@@ -505,7 +524,7 @@ async function _updateOneOff(id, name, amount) {
     .eq("id", id);
   if (error) {
     console.error("[state] one_off update failed:", error);
-    showToast("⚠ Konnte nicht gespeichert werden");
+    showToast("⚠ Konnte nicht gespeichert werden", "error");
     item.name = before.name;
     item.amount = before.amount;
     render();
@@ -516,25 +535,27 @@ async function _updateOneOff(id, name, amount) {
    Interne Supabase-Writer
    ============================================================ */
 
-async function _upsertHouseholdField(column, value) {
+async function _upsertHouseholdField(column, value, rollback) {
   const { error } = await window.supabase
     .from("household")
     .update({ [column]: value })
     .eq("user_id", _cache.userId);
   if (error) {
     console.error("[state] household update failed:", error);
-    showToast("⚠ Speichern fehlgeschlagen");
+    showToast("⚠ Speichern fehlgeschlagen", "error");
+    if (rollback) rollback();
   }
 }
 
-async function _updatePositionField(positionId, patch) {
+async function _updatePositionField(positionId, patch, rollback) {
   const { error } = await window.supabase
     .from("positions")
     .update(patch)
     .eq("id", positionId);
   if (error) {
     console.error("[state] position update failed:", error);
-    showToast("⚠ Speichern fehlgeschlagen");
+    showToast("⚠ Speichern fehlgeschlagen", "error");
+    if (rollback) rollback();
   }
 }
 
@@ -558,7 +579,7 @@ async function _upsertMonthlyState(ms) {
     .single();
   if (error) {
     console.error("[state] monthly_state upsert failed:", error);
-    showToast("⚠ Speichern fehlgeschlagen");
+    showToast("⚠ Speichern fehlgeschlagen", "error");
     return;
   }
   /* Server-IDs/Zeitstempel zurücknehmen (id, created_at, updated_at). */
@@ -576,7 +597,7 @@ async function _upsertTipState(tipId, status) {
     );
   if (error) {
     console.error("[state] tip upsert failed:", error);
-    showToast("⚠ Speichern fehlgeschlagen");
+    showToast("⚠ Speichern fehlgeschlagen", "error");
   }
 }
 

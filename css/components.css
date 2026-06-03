@@ -98,6 +98,29 @@
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
+.toast.toast-error {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+/* --- Offline-Banner --- */
+.offline-banner {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1100;
+  display: none;
+  text-align: center;
+  padding: 8px 16px;
+  background: var(--red);
+  color: var(--bg);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+body.fc-offline .offline-banner { display: block; }
 
 /* --- Hint --- */
 .hint {

@@ -93,3 +93,19 @@ function fcRenderAll() {
   updateHaushalt();
 }
 window.fcRenderAll = fcRenderAll;
+
+/* --- Offline-Erkennung ---
+   Setzt body.fc-offline (→ roter Banner) und bietet fcIsOnline()
+   als Guard für Schreib-Operationen. navigator.onLine ist nicht
+   100% zuverlässig (kann „true" trotz totem WLAN melden), das
+   offline-Event hingegen feuert verlässlich beim Verbindungsabriss. */
+function _applyOnlineState() {
+  document.body.classList.toggle("fc-offline", !navigator.onLine);
+}
+window.fcIsOnline = () => navigator.onLine;
+window.addEventListener("online", () => {
+  _applyOnlineState();
+  if (typeof showToast === "function") showToast("Verbindung wieder da");
+});
+window.addEventListener("offline", _applyOnlineState);
+_applyOnlineState();

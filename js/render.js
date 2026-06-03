@@ -8,11 +8,14 @@ function fmt(n) {
 function progColor(pct) {
   return pct >= 100 ? "var(--accent-2)" : "var(--accent)";
 }
-function showToast(msg) {
+let _toastTimer = null;
+function showToast(msg, type) {
   const t = document.getElementById("toast");
   t.textContent = msg;
+  t.classList.toggle("toast-error", type === "error");
   t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 2800);
+  if (_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => t.classList.remove("show"), 2800);
 }
 function escAttr(s) {
   return String(s)

@@ -133,7 +133,9 @@ Diese werden absichtlich nicht (sofort) auf `user_preferences` synchronisiert �
 | `toggleInc/Exp/Routine`, `dismissTip/restoreTip/acceptTip` | Bool-Toggle + Async-Upsert. |
 | `addIncome/addExpense`, `del*`, `edit*` | One-off-Entries verwalten (optimistic mit Temp-IDs). |
 
-Alle Setter sind **optimistic**: Cache wird sofort aktualisiert + `render()` läuft, Supabase-Write feuert im Hintergrund. Bei Fehler erscheint ein Toast; in `_addOneOff`/`_deleteOneOff`/`_updateOneOff` wird der Cache zurückgerollt.
+Alle Setter sind **optimistic**: Cache wird sofort aktualisiert + `render()` läuft, Supabase-Write feuert im Hintergrund. Bei Fehler erscheint ein **roter Fehler-Toast** (`showToast(msg, "error")`) und der Cache wird zurückgerollt + neu gerendert — bei den One-off-Settern (`_addOneOff`/`_deleteOneOff`/`_updateOneOff`) und seit Phase 2 auch bei den geld-kritischen Inline-Edits `setAmt`/`setName` (Haushalt-Beträge, Positions-Name/-Betrag; Rollback via `_rerenderAll()`). Monatsstatus-/Tip-Toggles zeigen nur den Fehler-Toast ohne Rollback (Verlust = ein nicht-persistiertes Häkchen, kein Geldwert).
+
+**Offline-Erkennung** (`app.js`): `body.fc-offline` schaltet einen roten Banner ein (`#offline-banner`), sobald das `offline`-Event feuert; `window.fcIsOnline()` steht als Guard bereit. Optimistische Writes laufen offline trotzdem an, scheitern und rollen zurück — der Banner erklärt warum.
 
 ## Konventionen
 
