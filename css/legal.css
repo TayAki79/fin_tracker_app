@@ -1,0 +1,217 @@
+/* ============================================================
+   LEGAL — Rechtsseiten (Impressum, Datenschutz, AGB)
+   ============================================================
+   Eigenständige Seiten, die base.css + fonts.css mitladen und
+   nur die hier definierten Bausteine zusätzlich brauchen.
+   Theme via data-theme (wie die App, fc-theme aus localStorage).
+   ============================================================ */
+
+.legal-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 24px;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: var(--hair) solid var(--border2);
+}
+
+.legal-wordmark {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144, "SOFT" 30;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-decoration: none;
+  line-height: 1;
+}
+.legal-wordmark .amp {
+  color: var(--accent);
+  margin: 0 2px;
+  font-variation-settings: "opsz" 144, "SOFT" 100;
+}
+
+.legal-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.legal-back {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text2);
+  text-decoration: none;
+  padding: 0 12px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  border: var(--hair) solid var(--border2);
+  transition: all 240ms var(--ease);
+}
+.legal-back:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--bg-tint);
+}
+.legal-theme-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 0;
+  border: var(--hair) solid var(--border2);
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 240ms var(--ease);
+}
+.legal-theme-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* --- Inhalt --- */
+.legal-content {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 56px 24px 96px;
+  position: relative;
+  z-index: 1;
+}
+
+.legal-content h1 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144, "SOFT" 30;
+  font-weight: 500;
+  font-size: clamp(30px, 6vw, 44px);
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  color: var(--text);
+  margin: 0 0 8px;
+}
+.legal-stand {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin: 0 0 8px;
+}
+.legal-content h2 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 22px;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  margin: 48px 0 16px;
+  padding-top: 22px;
+  border-top: var(--hair) solid var(--border);
+}
+.legal-content h3 {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text);
+  margin: 26px 0 8px;
+}
+.legal-content p {
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text2);
+  margin: 0 0 16px;
+  letter-spacing: -0.003em;
+}
+.legal-content ul {
+  margin: 0 0 16px;
+  padding-left: 0;
+  list-style: none;
+}
+.legal-content li {
+  position: relative;
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--text2);
+  padding-left: 20px;
+  margin-bottom: 7px;
+}
+.legal-content li::before {
+  content: "—";
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+}
+.legal-content a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: var(--hair) solid color-mix(in srgb, var(--accent) 45%, transparent);
+  transition: border-color 200ms var(--ease);
+}
+.legal-content a:hover {
+  border-bottom-color: var(--accent);
+}
+.legal-addr {
+  font-style: normal;
+  display: block;
+  margin: 0 0 16px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text2);
+}
+
+/* --- Footer (geteilt mit der App perspektivisch) --- */
+.legal-footer {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 28px 24px 48px;
+  border-top: var(--hair) solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 22px;
+}
+.legal-footer a {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text3);
+  text-decoration: none;
+  transition: color 200ms var(--ease);
+}
+.legal-footer a:hover { color: var(--accent); }
+.legal-footer a[aria-current="page"] { color: var(--text); }
+.legal-footer .legal-footer-sep { color: var(--border2); font-size: 10px; }
+.legal-footer .legal-footer-copy {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--text3);
+  margin-left: auto;
+}
+
+@supports (padding: max(0px)) {
+  .legal-topbar { padding-top: max(16px, env(safe-area-inset-top)); }
+  .legal-footer { padding-bottom: max(48px, calc(24px + env(safe-area-inset-bottom))); }
+}
+
+@media (max-width: 600px) {
+  .legal-content { padding: 36px 18px 72px; }
+  .legal-footer { padding-left: 18px; padding-right: 18px; }
+  .legal-footer .legal-footer-copy { margin-left: 0; width: 100%; margin-top: 8px; }
+}
