@@ -1,0 +1,175 @@
+DATENSCHUTZERKLÄRUNG — Finanz-Cockpit
+Stand: Juni 2026
+
+
+1. Verantwortlicher
+-------------------
+Verantwortlich für die Datenverarbeitung auf dieser Website und in der Anwendung
+„Finanz-Cockpit" ist:
+
+Akradeth Tayarat
+Odenwaldstr. 46c
+63322 Rödermark
+Deutschland
+E-Mail: support@akradev.de
+
+
+2. Grundsätzliches
+------------------
+Finanz-Cockpit ist eine Anwendung zur persönlichen Finanzverwaltung. Wir
+verarbeiten personenbezogene Daten nur, soweit dies für die Bereitstellung der
+Anwendung erforderlich ist. Die Verarbeitung erfolgt im Einklang mit der
+Datenschutz-Grundverordnung (DSGVO) und dem Bundesdatenschutzgesetz (BDSG).
+
+Wir setzen keine Analyse-, Tracking- oder Werbe-Tools ein. Es findet kein
+Profiling und keine Weitergabe deiner Daten zu Werbezwecken statt.
+
+
+3. Welche Daten wir verarbeiten, Zwecke und Rechtsgrundlagen
+------------------------------------------------------------
+
+a) Konto- und Zugangsdaten
+Bei der Registrierung verarbeiten wir deine E-Mail-Adresse sowie ein Passwort.
+Das Passwort wird ausschließlich in verschlüsselt-gehashter Form gespeichert und
+ist für uns nicht im Klartext einsehbar.
+Zweck: Einrichtung und Absicherung deines Nutzerkontos, Anmeldung.
+Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Erfüllung des Nutzungsvertrags).
+
+b) Von dir eingegebene Finanzdaten
+Innerhalb der Anwendung gibst du selbst Daten ein, z. B. Einnahmen, Ausgaben,
+Vermögenswerte, Sparziele und ähnliche Angaben. Diese Daten sind ausschließlich
+deinem Konto zugeordnet und werden in einer durch Zugriffsbeschränkungen
+(Row-Level-Security) je Nutzer getrennten Datenbank gespeichert.
+Zweck: Bereitstellung der Kernfunktion der Anwendung (Tracking deiner Finanzen).
+Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO.
+Hinweis: Es handelt sich nicht um besondere Kategorien personenbezogener Daten
+im Sinne des Art. 9 DSGVO.
+
+c) Server-Logfiles
+Beim Aufruf der Website werden durch den Hosting-Anbieter technisch notwendige
+Zugriffsdaten verarbeitet (z. B. IP-Adresse, Datum und Uhrzeit, abgerufene
+Ressource, Browsertyp). Diese dienen dem sicheren und stabilen Betrieb.
+Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse am
+sicheren Betrieb).
+
+d) E-Mail-Versand (Authentifizierung)
+Zur Bestätigung der Registrierung und zum Zurücksetzen des Passworts versenden
+wir transaktionale E-Mails an deine Adresse. Marketing- oder Newsletter-Mails
+versenden wir derzeit nicht.
+Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO.
+
+
+4. Hosting (Hostinger)
+----------------------
+Die Website wird bei der Hostinger International Ltd. gehostet. Hostinger
+verarbeitet die unter 3 c) genannten Daten in unserem Auftrag. Es besteht ein
+Auftragsverarbeitungsvertrag nach Art. 28 DSGVO.
+
+
+5. Datenbank und Authentifizierung (Supabase)
+---------------------------------------------
+Konto- und Finanzdaten werden über den Dienst Supabase (Supabase, Inc.)
+gespeichert und verwaltet. Der für dieses Projekt genutzte Datenbank-Standort
+liegt in der Europäischen Union (Region Frankfurt, Deutschland). Es besteht ein
+Auftragsverarbeitungsvertrag nach Art. 28 DSGVO.
+Supabase setzt seinerseits Unterauftragsverarbeiter ein (u. a. Anbieter von
+Hosting- und Infrastrukturdiensten). Soweit dabei eine Übermittlung in die USA
+oder andere Drittländer erfolgen kann, ist diese durch die EU-Standardvertrags-
+klauseln und/oder das EU-US Data Privacy Framework abgesichert.
+Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO; für Drittlandübermittlungen
+Art. 46 DSGVO (geeignete Garantien) bzw. Art. 45 DSGVO (Angemessenheits-
+beschluss).
+
+
+6. E-Mail-Versand (Mailtrap)
+----------------------------
+Für den Versand der unter 3 d) genannten E-Mails nutzen wir den Dienst Mailtrap
+(Railsware Products Studio LLC) mit Sitz in den USA. Dabei wird deine
+E-Mail-Adresse verarbeitet. Es besteht ein Auftragsverarbeitungsvertrag nach
+Art. 28 DSGVO. Die Übermittlung in die USA ist durch das EU-US Data Privacy
+Framework und/oder die EU-Standardvertragsklauseln abgesichert.
+Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO; für die Drittlandübermittlung
+Art. 46 bzw. Art. 45 DSGVO.
+
+
+7. Lokale Speicherung im Browser (localStorage)
+------------------------------------------------
+Die Anwendung speichert einige technisch notwendige Einstellungen direkt in
+deinem Browser (localStorage), nicht auf unseren Servern:
+- die gewählte Designvariante (hell/dunkel),
+- den Aufklapp-Zustand einzelner Bereiche der Oberfläche,
+- einen Hinweis, ob du die Willkommens-Einführung bereits gesehen hast.
+Zusätzlich wird ein technisch notwendiger Anmelde-Token (Session) gespeichert,
+damit du angemeldet bleibst.
+Diese Speicherung ist für den Betrieb der von dir aufgerufenen Anwendung
+unbedingt erforderlich; eine Einwilligung ist hierfür nach § 25 Abs. 2 TDDDG
+nicht erforderlich. Es werden keine Tracking- oder Marketing-Cookies gesetzt.
+
+
+8. Drittlandübermittlung — Zusammenfassung
+-------------------------------------------
+Eine Übermittlung personenbezogener Daten in Drittländer (insbesondere die USA)
+kann im Zusammenhang mit Supabase (Unterauftragsverarbeiter) und Mailtrap
+(E-Mail-Versand) erfolgen. Abgesichert wird dies durch das EU-US Data Privacy
+Framework und/oder die EU-Standardvertragsklauseln gemäß Art. 46 DSGVO.
+
+
+9. Speicherdauer und Löschung
+-----------------------------
+Wir speichern deine Daten, solange dein Konto besteht. Du kannst dein Konto
+jederzeit selbst in der Anwendung löschen (Konto-Bereich → „Konto löschen").
+Mit der Löschung werden deine personenbezogenen Daten gelöscht, soweit keine
+gesetzlichen Aufbehaltungspflichten entgegenstehen. Bei einzelnen
+Auftragsverarbeitern kann die vollständige Entfernung aus Sicherungskopien und
+Protokollen technisch bis zu 30 Tage in Anspruch nehmen.
+
+
+10. Deine Rechte
+----------------
+Du hast nach der DSGVO das Recht auf:
+- Auskunft (Art. 15),
+- Berichtigung (Art. 16),
+- Löschung (Art. 17),
+- Einschränkung der Verarbeitung (Art. 18),
+- Datenübertragbarkeit (Art. 20),
+- Widerspruch gegen die Verarbeitung (Art. 21).
+
+Zur Ausübung dieser Rechte genügt eine Nachricht an support@akradev.de.
+
+
+11. Beschwerderecht bei einer Aufsichtsbehörde
+----------------------------------------------
+Du hast das Recht, dich bei einer Datenschutz-Aufsichtsbehörde zu beschweren.
+Die für den Verantwortlichen zuständige Behörde ist:
+Der Hessische Beauftragte für Datenschutz und Informationsfreiheit (HBDI),
+Wiesbaden. Die aktuellen Kontaktdaten findest du auf der Website der Behörde.
+Du kannst dich auch an die Aufsichtsbehörde deines Wohnorts wenden.
+
+
+12. Änderungen dieser Datenschutzerklärung
+-------------------------------------------
+Wir passen diese Datenschutzerklärung an, wenn sich die Datenverarbeitung oder
+die Rechtslage ändert. Es gilt die jeweils auf dieser Seite veröffentlichte
+Fassung.
+
+
+--------------------------------------------------------------------------
+Hinweis für Claude Code (nicht Teil des veröffentlichten Texts):
+
+1. Im Site-Stil als datenschutz.html rendern — analog zu impressum.html:
+   lokale Fonts, fc-theme-Übernahme, Theme-Toggle, "Zurück zur App", Footer mit
+   Links zu impressum.html, datenschutz.html, agb.html, index.html.
+
+2. WICHTIG — bei künftigen Änderungen am Setup MUSS dieser Text angepasst
+   werden, sonst wird er falsch:
+   - Sobald Newsletter/Marketing-Mails eingeführt werden: Abschnitt 3 d) +
+     neue Einwilligungs-Rechtsgrundlage (Art. 6 Abs. 1 lit. a DSGVO) ergänzen.
+   - Sobald ein Analyse-/Tracking-Tool oder ein Runtime-CDN hinzukommt:
+     Abschnitt 2 und 7 anpassen, ggf. wird dann ein Cookie-Consent-Banner
+     erforderlich.
+   - Sobald aus der Privatperson ein Gewerbe wird: Verantwortlicher (Abschnitt 1)
+     anpassen, mit Impressum synchron halten.
+   - Sobald Zahlungen/Zahlungsdienstleister (z. B. Stripe) dazukommen: eigener
+     Abschnitt nötig.
+
+3. Vor Monetarisierung: anwaltliche Gegenprüfung empfohlen (Finanzdaten).

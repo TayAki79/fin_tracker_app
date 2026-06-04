@@ -1,0 +1,146 @@
+ALLGEMEINE GESCHÄFTSBEDINGUNGEN (AGB) / NUTZUNGSBEDINGUNGEN — Finanz-Cockpit
+Stand: Juni 2026
+
+
+1. Geltungsbereich und Anbieter
+-------------------------------
+Diese Nutzungsbedingungen gelten für die Nutzung der Anwendung „Finanz-Cockpit"
+(nachfolgend „App"), bereitgestellt von:
+
+Akradeth Tayarat
+Odenwaldstr. 46c
+63322 Rödermark
+E-Mail: support@akradev.de
+(nachfolgend „Anbieter")
+
+Mit der Registrierung und Nutzung der App erkennst du diese Bedingungen an.
+
+
+2. Leistungsbeschreibung
+------------------------
+Die App ist ein Werkzeug zur persönlichen Erfassung und Übersicht von Finanzen
+(Einnahmen, Ausgaben, Vermögenswerte, Sparziele und Ähnliches). Sie dient
+ausschließlich der eigenen Organisation und Darstellung der vom Nutzer selbst
+eingegebenen Daten. Die App führt keine Transaktionen aus, verwaltet kein Geld
+und ist mit keinem Bank- oder Wertpapierkonto verbunden.
+
+
+3. Kostenlose Nutzung / Hinweis zur Erprobungsphase
+---------------------------------------------------
+Die App wird derzeit kostenlos bereitgestellt. Es besteht kein Anspruch auf eine
+dauerhaft kostenlose Nutzung oder auf einen bestimmten Funktionsumfang. Die App
+kann sich in einer Erprobungs-/Testphase befinden; einzelne Funktionen können
+unvollständig sein, sich ändern oder entfallen.
+
+
+4. Registrierung und Nutzerkonto
+--------------------------------
+Für die Nutzung ist ein Nutzerkonto erforderlich. Du bist verpflichtet, bei der
+Registrierung zutreffende Angaben zu machen und deine Zugangsdaten geheim zu
+halten. Du bist für alle Aktivitäten verantwortlich, die über dein Konto
+erfolgen. Bei Verdacht auf Missbrauch informiere den Anbieter unverzüglich.
+
+
+5. Pflichten des Nutzers
+------------------------
+Du verpflichtest dich,
+- die App nicht missbräuchlich oder rechtswidrig zu nutzen,
+- keine Sicherheitsmaßnahmen zu umgehen und den Betrieb nicht zu stören,
+- keine Inhalte einzugeben, die Rechte Dritter verletzen.
+Für die Richtigkeit und Vollständigkeit der von dir eingegebenen Daten bist
+allein du verantwortlich.
+
+
+6. Keine Anlage-, Steuer- oder Rechtsberatung
+---------------------------------------------
+Die App stellt ausschließlich allgemeine Informationen und eine Darstellung
+deiner selbst eingegebenen Daten bereit. Sie stellt KEINE Anlageberatung, keine
+Steuerberatung und keine Rechtsberatung dar und ersetzt eine solche nicht.
+Etwaige in der App enthaltene Hinweise oder „Finanztipps" sind allgemeiner Natur
+und keine auf deine persönliche Situation zugeschnittene Empfehlung im Sinne des
+Wertpapierhandels- oder Aufsichtsrechts.
+Sämtliche Berechnungen, Auswertungen und Darstellungen erfolgen ohne Gewähr für
+Richtigkeit, Vollständigkeit oder Aktualität. Entscheidungen, die du auf
+Grundlage der App triffst, triffst du in eigener Verantwortung. Für verbindliche
+Auskünfte wende dich an eine fachlich qualifizierte Stelle (z. B. Steuer- oder
+Anlageberatung).
+
+
+7. Verfügbarkeit, Änderungen, Einstellung des Dienstes
+------------------------------------------------------
+Der Anbieter bemüht sich um einen möglichst störungsfreien Betrieb, schuldet
+jedoch keine bestimmte Verfügbarkeit. Wartungsarbeiten, technische Störungen
+oder Umstände außerhalb des Einflussbereichs des Anbieters können zu
+Unterbrechungen führen. Der Anbieter ist berechtigt, die App zu ändern,
+einzuschränken oder den Betrieb mit angemessener Vorankündigung einzustellen.
+Du bist selbst dafür verantwortlich, deine Daten bei Bedarf zu sichern, soweit
+die App eine Export-/Sicherungsfunktion bereitstellt.
+
+
+8. Haftung
+----------
+(1) Der Anbieter haftet unbeschränkt für Schäden aus der Verletzung des Lebens,
+des Körpers oder der Gesundheit sowie für Schäden, die auf Vorsatz oder grober
+Fahrlässigkeit beruhen.
+(2) Bei einfacher Fahrlässigkeit haftet der Anbieter nur bei Verletzung einer
+wesentlichen Vertragspflicht (Kardinalpflicht) — also einer Pflicht, deren
+Erfüllung die ordnungsgemäße Nutzung der App überhaupt erst ermöglicht und auf
+deren Einhaltung du regelmäßig vertrauen darfst. In diesem Fall ist die Haftung
+auf den vertragstypischen, vorhersehbaren Schaden begrenzt.
+(3) Eine darüber hinausgehende Haftung ist ausgeschlossen.
+(4) Die Haftung nach dem Produkthaftungsgesetz bleibt unberührt.
+(5) Da die App unentgeltlich bereitgestellt wird, ist die Haftung des Anbieters
+für Schäden, die durch die kostenlose Nutzung entstehen, im gesetzlich
+zulässigen Rahmen entsprechend eingeschränkt; die vorstehenden Absätze 1 bis 4
+bleiben unberührt.
+
+
+9. Datenschutz
+--------------
+Informationen zur Verarbeitung personenbezogener Daten findest du in der
+Datenschutzerklärung.
+
+
+10. Laufzeit und Beendigung
+---------------------------
+Das Nutzungsverhältnis läuft auf unbestimmte Zeit. Du kannst dein Konto jederzeit
+ohne Angabe von Gründen selbst in der App löschen. Der Anbieter kann das
+Nutzungsverhältnis mit angemessener Frist kündigen; bei Verstößen gegen diese
+Bedingungen auch fristlos. Mit Beendigung werden deine Daten nach Maßgabe der
+Datenschutzerklärung gelöscht.
+
+
+11. Änderungen dieser Bedingungen
+---------------------------------
+Der Anbieter kann diese Bedingungen mit Wirkung für die Zukunft ändern, soweit
+dies erforderlich ist und dich nicht unangemessen benachteiligt. Über
+wesentliche Änderungen wirst du in geeigneter Weise informiert. Widersprichst du
+nicht innerhalb einer angemessenen Frist bzw. nutzt die App weiter, gelten die
+geänderten Bedingungen als angenommen.
+
+
+12. Schlussbestimmungen
+-----------------------
+Es gilt das Recht der Bundesrepublik Deutschland. Zwingende verbraucher-
+schützende Vorschriften des Staates, in dem du deinen gewöhnlichen Aufenthalt
+hast, bleiben unberührt. Sollte eine Bestimmung dieser Bedingungen unwirksam
+sein, bleibt die Wirksamkeit der übrigen Bestimmungen unberührt.
+
+
+--------------------------------------------------------------------------
+Hinweis für Claude Code (nicht Teil des veröffentlichten Texts):
+
+1. Im Site-Stil als agb.html rendern — analog zu impressum.html und
+   datenschutz.html: lokale Fonts, fc-theme-Übernahme, Theme-Toggle,
+   "Zurück zur App", Footer mit Links zu impressum.html, datenschutz.html,
+   agb.html, index.html.
+
+2. Bei künftigen Änderungen anpassen:
+   - Sobald die App kostenpflichtig wird (Monetarisierung): Abschnitt 3 + 8(5)
+     überarbeiten, Zahlungsbedingungen + Widerrufsrecht (14 Tage, Fernabsatz)
+     für Verbraucher ergänzen.
+   - Sobald aus der Privatperson ein Gewerbe wird: Anbieter (Abschnitt 1) mit
+     Impressum synchron halten.
+
+3. Haftungsklausel (Abschnitt 8) ist der heikelste Teil — vor Monetarisierung
+   anwaltlich gegenlesen lassen.

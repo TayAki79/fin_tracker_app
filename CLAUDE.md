@@ -1,6 +1,6 @@
 # Finanz-Cockpit
 
-Finanz-Tracker (auf Deutsch). **Multi-User-SaaS in Phase 1.** Aktueller Zustand: Vanilla-Frontend + Supabase-Backend (Auth + Daten).
+Finanz-Tracker (auf Deutsch). **Multi-User-SaaS, aktuell in Phase 3 (Recht & Landing).** Zustand: Vanilla-Frontend + Supabase-Backend (Auth + Daten), live auf akradev.de (Hostinger). Phasen 1, 2, 2.5 abgeschlossen.
 
 ## Tech Stack
 
@@ -35,6 +35,9 @@ Vor erstem Start: `js/config.example.js` nach `js/config.js` kopieren und Supaba
 ```
 fin_tracker_web/
 ├── index.html              # Einzige HTML-Datei, enthält Auth-Gate + alle 4 Tabs
+├── impressum.html          # Phase 3 — aus docs/legal-texts/impressum.txt im Site-Stil zu rendern
+├── datenschutz.html        # Phase 3 — aus docs/legal-texts/datenschutz.txt im Site-Stil zu rendern
+├── agb.html                # Phase 3 — aus docs/legal-texts/agb.txt im Site-Stil zu rendern
 ├── .github/
 │   └── workflows/
 │       └── supabase-keepalive.yml  # Cron-Ping alle 4h gegen Free-Tier-Schlaf
@@ -47,7 +50,8 @@ fin_tracker_web/
 │   ├── layout.css          # Topbar, Container, Grids, Tabs, Navigation
 │   └── components.css      # Buttons, Panels, Rows, Inputs, Auth-Gate, alle UI-Elemente
 ├── docs/
-│   └── supabase-schema.md  # Datenbankschema-Doku (lesbar, mit SQL)
+│   ├── supabase-schema.md  # Datenbankschema-Doku (lesbar, mit SQL)
+│   └── legal-texts/        # Klartext-Quellen der Rechtsseiten (impressum/datenschutz/agb .txt)
 ├── supabase/
 │   ├── etappe-a-tables.sql            # Tabellen + Indexe + Trigger
 │   ├── etappe-b-rls.sql               # Row-Level-Security-Policies
@@ -185,8 +189,31 @@ Alle Setter sind **optimistic**: Cache wird sofort aktualisiert + `render()` lä
 - **Fonts aktualisieren**: Google-`css2`-URL mit Browser-User-Agent holen (liefert woff2), nur `latin` + `latin-ext` Blöcke behalten, woff2 nach `assets/fonts/`, `url()` auf `../assets/fonts/<datei>` umschreiben → `css/fonts.css`.
 - Onboarding-Overlay anpassen: `index.html` (`#onboarding-overlay`) + `js/auth.js` (`maybeShowOnboarding`/`dismissOnboarding`, getriggert in `enterApp` nach dem ersten erfolgreichen Login).
 - Konto-Modal / Account-Löschung: `index.html` (`#account-modal`) + `js/auth.js` (Modal-Handler + `supabase.functions.invoke("delete-account")`).
+- Rechtsseiten erstellen/ändern: Quelltexte in `docs/legal-texts/` (`impressum.txt` / `datenschutz.txt` / `agb.txt`) → als `*.html` (im Root) im Site-Stil rendern (siehe „Recht & Compliance"). Footer-Links auf allen drei + `index.html` synchron halten.
 
 ---
+
+## Recht & Compliance (Phase 3)
+
+**Betreiber:** Akradeth Tayarat, Odenwaldstr. 46c, 63322 Rödermark, support@akradev.de — als **Privatperson** (kein Gewerbe; Wechsel zu Gewerbe spätestens bei Monetarisierung / Phase 7). Privatadresse bewusst öffentlich im Impressum.
+
+**Support-Postfach:** `support@akradev.de` — echtes Hostinger-Postfach (empfängt), getrennt vom `no-reply@akradev.de` (Mailtrap-Versand). Regelmäßig prüfen, sobald die Rechtstexte live sind.
+
+**Auftragsverarbeitung (AVV/DPA) — abgelegt:** Supabase (statisches PDF `supabase.com/legal/dpa`; signierte PandaDoc-Version optional für später), Mailtrap (PDF `mailtrap.io/dpa/`; Mailtrap = Railsware Products Studio LLC, USA), Hostinger (per Browser-Druck als PDF gesichert, `hostinger.com/legal/dpa`; gilt automatisch via ToS). Nachweise lokal abgelegt — kein Blocker für die Beta.
+
+**Rechtstexte:** Klartext-Quellen in `docs/legal-texts/` (`impressum.txt`, `datenschutz.txt`, `agb.txt`). Zu rendern als `impressum.html`, `datenschutz.html`, `agb.html` (im Root, damit unter `akradev.de/impressum.html` erreichbar) im Site-Stil (lokale Fonts, `fc-theme`-Übernahme, Theme-Toggle, „Zurück zur App"). Gemeinsamer Footer auf allen Rechtsseiten (perspektivisch auch im App-Footer): Links zu `impressum.html` · `datenschutz.html` · `agb.html` · `index.html`. **WICHTIG: alle drei zusammen deployen**, sonst tote Links.
+
+**Cookie-/Consent-Banner: NICHT erforderlich.** Nur technisch notwendige Speicherung (Supabase-Login-Token + `localStorage` `fc-theme`/`fc-collapsed`/`fc-onboarded`) → Ausnahme nach § 25 Abs. 2 TDDDG. Kein Analytics/Tracking/Runtime-CDN im Client (Fonts + Supabase-JS lokal). Sobald sich das ändert (Analytics, Runtime-CDN, Marketing-Mails), wird ein Consent-Banner + Anpassung der Datenschutzerklärung nötig.
+
+**Verbindliche Rechts-Fakten (nicht aus dem Gedächtnis abändern):**
+- Impressum nach **§ 5 DDG** (nicht TMG — abgelöst seit Mai 2024).
+- **Kein OS-/ODR-Plattform-Link** mehr (EU-Plattform zum 20.07.2025 abgeschaltet; toter Link = Abmahnrisiko).
+- US-Transfers (Mailtrap, Supabase-Sub-Verarbeiter) abgesichert über **EU-US Data Privacy Framework UND/ODER EU-Standardvertragsklauseln** (DPF in Kraft, EuGH-Berufung anhängig — SCC als Auffangschirm; Formulierung bewusst robust gehalten).
+- **„Keine Anlageberatung"** (AGB § 6) hält außerhalb der BaFin-Regulierung, solange reiner Tracker + allgemeine Tipps.
+
+**Offen in Phase 3:** Rechtstexte als HTML rendern, Landingpage + Footer-Einbettung.
+
+
 
 ## Roadmap zum App-Store-Launch
 
@@ -198,7 +225,7 @@ Stack-Entscheidung für die App: **Capacitor** — verpackt die bestehende Vanil
 | **1 — Fundament** | Multi-User-Basis | Supabase, Auth, RLS, 4 Tabs | — | ✅ erledigt |
 | **2 — Web-App härten** | Vom Prototyp zum stabilen Produkt | **RLS-Audit** (User A darf nie Daten von User B sehen) · Account-Löschung in-App (Apple-Pflicht) · Error-Handling · Empty-State/Onboarding · Mobile-Layout · CDN-Imports lokal ins Projekt holen | ~2–3 Wo | ✅ erledigt (Tests bestanden) |
 | **2.5 — Go-Live (Staging)** | Live-URL als Voraussetzung für Phase 3+4 | Deployment auf Hostinger (`akradev.de`) via Git-Deploy (GitHub-OAuth-Auto-Deploy) · `config.js` committet · Supabase Auth-URLs auf Domain · HTTPS/SSL · Mailtrap-SMTP · Edge Function `delete-account` live | ~1–2 Tage | ✅ erledigt (1 Restbug, s.u.) |
-| **3 — Recht & Landing** | Pflicht vor Veröffentlichung | Impressum · Datenschutz (DSGVO) · AGB · Support-URL · Landingpage | ~1 Wo | offen |
+| **3 — Recht & Landing** | Pflicht vor Veröffentlichung | ✅ Impressum · ✅ Datenschutz (DSGVO) · ✅ AGB · ✅ Support-Postfach · ✅ DPAs abgelegt · ✅ Cookie-Banner-Entscheidung · offen: Rechtstexte als HTML rendern + Landingpage + Footer | ~1 Wo | in Arbeit |
 | **4 — Closed Beta** | Validieren *bevor* App-Aufwand entsteht | 5–10 echte Tester · Feedback · Bugfixing | ~2–3 Wo (parallel) | offen |
 | **5 — Native Wrapping** | Beide Stores aus einer Codebasis | Capacitor einrichten · Android-Build (PC) · iOS-Build (Mac) · Test auf echten Geräten · Icon/Splash | ~1–2 Wo | offen |
 | **6 — Store-Launch** | Live in Play Store + App Store | Developer-Accounts (Google + Apple) · Store-Assets/Screenshots · Datensicherheits-/Privacy-Formulare · Einreichung · Review-Runden | ~2–4 Wo | offen |
