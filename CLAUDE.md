@@ -13,7 +13,7 @@ Vanilla bleibt — solange es trägt. Build-Step wird eingeführt, wenn die Komp
 
 ## Lokale Entwicklung
 
-⚠️ **Doppelklick auf `index.html` funktioniert nicht mehr** — ES-Module brauchen HTTP-CORS.
+⚠️ **Die App liegt unter `app.html`** (ES-Module brauchen HTTP-CORS → Doppelklick funktioniert nicht). `index.html` ist die statische Landingpage; `http://localhost:8765` zeigt sie, die App ist `http://localhost:8765/app.html`.
 
 ```bash
 # Im Projekt-Root:
@@ -28,13 +28,14 @@ Vor erstem Start: `js/config.example.js` nach `js/config.js` kopieren und Supaba
 - **Supabase Keep-Alive** (`.github/workflows/supabase-keepalive.yml`): GitHub Action, die alle 4 Stunden die REST-API gegen `profiles` pingt. Das Supabase-Free-Tier-Projekt pausiert nach 7 Tagen Inaktivität (→ 30–60 s Cold-Start); der Cron-Ping hält es dauerhaft wach. Braucht die Repo-Secrets `SUPABASE_URL` + `SUPABASE_ANON_KEY` (nur Anon-Key, kein `service_role`). HTTP 200 **oder** 401 gelten als Erfolg — beide bedeuten, dass die Query durch Postgres lief.
 - **Edge Functions** (`supabase/functions/`): Deno-Functions für alles, was den `service_role`-Key braucht. Aktuell: `delete-account` (in-App Konto-Löschung, DSGVO + Apple-Pflicht). Deployment je Function via `supabase functions deploy <name>` — Details im jeweiligen `README.md`. Secrets (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`) injiziert Supabase automatisch. Frontend ruft sie via `supabase.functions.invoke(...)` mit dem User-JWT — die Function leitet die `user.id` aus dem Token ab, nie aus dem Body. **Erst nach Deployment funktioniert der „Konto löschen"-Flow** (User-Chip oben rechts → Konto → Gefahrenzone).
 - **E-Mail-Versand / SMTP** (Auth-Mails): Custom SMTP über **Mailtrap Email Sending** (Transactional Stream), konfiguriert in Supabase → *Authentication → SMTP Settings*. Absender **`no-reply@akradev.de`**, Name **Finanz-Cockpit**; Host `live.smtp.mailtrap.io:587`, User `api`, Password = Mailtrap-**API-Token** (Geheimnis, nur im Supabase-Feld — nie ins Repo). Domain `akradev.de` ist in Mailtrap per DNS (SPF/DKIM in der Hostinger-DNS-Zone) **verifiziert**. Ersetzt den Supabase-Default-Absender. ⚠️ Mailtraps „Sender Information" (Pflicht-Postadresse, Anti-Spam-Recht) enthält **vorerst eine private Adresse** — **vor der Closed Beta auf eine ladungsfähige Geschäftsadresse wechseln** (gilt auch fürs Impressum, Phase 3).
-- **Deployment / Hosting** (Phase 2.5): Static-Hosting auf **Hostinger**, Domain **`akradev.de`** (vorerst privates Staging/Test). Frontend-Dateien liegen in `public_html`. Quelle ist GitHub (Git-Deploy). **Konfig-Punkte:** (1) `js/config.js` ist **committet** (nur URL + anon-Key, public-safe) und wird so vom Git-Deploy automatisch ausgerollt — kein manuelles Anlegen mehr nötig (untracked Dateien überleben den Deploy-Checkout nicht); (2) in Supabase unter *Authentication → URL Configuration* müssen **Site URL** + **Redirect URLs** die Produktions-Domain `https://akradev.de` enthalten, sonst zeigen Verify-/Reset-Mails auf localhost; (3) HTTPS/SSL für die Domain aktiv. `service_role`-Key und `supabase/`-SQL gehören NICHT auf den Webserver.
+- **Deployment / Hosting** (Phase 2.5): Static-Hosting auf **Hostinger**, Domain **`akradev.de`** (vorerst privates Staging/Test). Frontend-Dateien liegen in `public_html`. Quelle ist GitHub (Git-Deploy). **Konfig-Punkte:** (1) `js/config.js` ist **committet** (nur URL + anon-Key, public-safe) und wird so vom Git-Deploy automatisch ausgerollt — kein manuelles Anlegen mehr nötig (untracked Dateien überleben den Deploy-Checkout nicht); (2) in Supabase unter *Authentication → URL Configuration*: **Redirect URLs** = `https://akradev.de/**` (deckt `/app.html` ab — die App liegt seit der Landingpage unter `app.html`, und `auth.js` setzt `emailRedirectTo` = origin+pathname = `/app.html`); **Site URL** am besten auf `https://akradev.de/app.html` setzen, damit auch Fallback-Auth-Links in der App landen, nicht auf der Landing; (3) HTTPS/SSL für die Domain aktiv. `service_role`-Key und `supabase/`-SQL gehören NICHT auf den Webserver.
 
 ## Projektstruktur
 
 ```
 fin_tracker_web/
-├── index.html              # Einzige HTML-Datei, enthält Auth-Gate + alle 4 Tabs
+├── index.html              # Landingpage (öffentliche Startseite, Phase 3)
+├── app.html                # Die App: Auth-Gate + alle 4 Tabs (vormals index.html)
 ├── impressum.html          # Phase 3 — aus docs/legal-texts/impressum.txt im Site-Stil zu rendern
 ├── datenschutz.html        # Phase 3 — aus docs/legal-texts/datenschutz.txt im Site-Stil zu rendern
 ├── agb.html                # Phase 3 — aus docs/legal-texts/agb.txt im Site-Stil zu rendern
@@ -49,7 +50,8 @@ fin_tracker_web/
 │   ├── base.css            # CSS-Variablen, Themes, Typografie, Atmosphäre
 │   ├── layout.css          # Topbar, Container, Grids, Tabs, Navigation
 │   ├── components.css      # Buttons, Panels, Rows, Inputs, Auth-Gate, alle UI-Elemente
-│   └── legal.css           # Stil der Rechtsseiten + geteilter Footer (.legal-*)
+│   ├── legal.css           # Stil der Rechtsseiten + geteilter Footer (.legal-*)
+│   └── landing.css         # Stil der Landingpage (index.html): Hero, Features, App-Mockup (.lp-*)
 ├── scripts/
 │   └── render-legal.py     # Dev-Tool: rendert docs/legal-texts/*.txt → *.html (kein Runtime-Build)
 ├── docs/
@@ -65,7 +67,7 @@ fin_tracker_web/
 │       └── delete-account/             # Edge Function: Konto-Löschung (service_role)
 │           ├── index.ts                # Deno-Function: admin.deleteUser(self)
 │           └── README.md               # Deploy-Anleitung (supabase functions deploy)
-└── js/                     # Reihenfolge in index.html ist KRITISCH
+└── js/                     # Reihenfolge in app.html ist KRITISCH
     ├── vendor/
     │   └── supabase-js@2.39.8.umd.js  # Lokales Supabase-Bundle (window.supabase-Library)
     ├── data.js             # Statische Inhalte (MONTHS, TIPS_DATA, CAT)
@@ -168,7 +170,7 @@ Alle Setter sind **optimistic**: Cache wird sofort aktualisiert + `render()` lä
 - **Kein Framework hinzufügen** (React, Vue, Svelte etc.) — solange Vanilla trägt.
 - **Keinen Build-Schritt einführen** — solange CDN-Imports reichen.
 - **Default-Werte ändern** im Signup-Bootstrap-Trigger (`supabase/etappe-c-bootstrap.sql`) ohne Migrations-Plan — bestehende User behalten ihre Daten, neue User bekommen die neuen Defaults; Inkonsistenz möglich.
-- **Script-Reihenfolge in `index.html`** nicht umstellen.
+- **Script-Reihenfolge in `app.html`** nicht umstellen.
 - **`js/config.js` enthält NUR Project-URL + anon-Key** — die sind public-safe (RLS schützt die Daten; der Key steht ohnehin im ausgelieferten Browser-Code) und werden **bewusst committet**, damit der Git-Deploy auf Hostinger sie mit ausrollt (untracked Dateien überleben den Deploy-Checkout nicht). **Der `service_role`-Key gehört NIEMALS hierher** — nur in Edge Functions.
 - **`service_role`-Key niemals ins Frontend** — gehört ausschließlich in Supabase Edge Functions.
 - **Personenbezogene Daten** in `data.js` (oder anderswo im Code) hinterlegen — alles Konkrete gehört ins Backend.
@@ -188,10 +190,11 @@ Alle Setter sind **optimistic**: Cache wird sofort aktualisiert + `render()` lä
 - Neuen Tab hinzufügen: `<div class="tab" onclick="showTab('name',this)">` im Topnav + `<div id="tab-name" class="page">` im Container.
 - Theme-Farbe ändern: `css/base.css` → `:root` bzw. `[data-theme="light"]`.
 - Auth-Flow anpassen: `js/auth.js` (`enterApp`/`leaveApp`, `screens.*` Form-Handler).
-- **Supabase-JS aktualisieren**: neues UMD-Bundle laden (`https://cdn.jsdelivr.net/npm/@supabase/supabase-js@<ver>/dist/umd/supabase.js`) → `js/vendor/` ablegen, alten löschen, Dateinamen im `<script>`-Tag (index.html) + Doku anpassen. Muss self-contained sein (keine `import`/`/npm`-Statements).
+- **Supabase-JS aktualisieren**: neues UMD-Bundle laden (`https://cdn.jsdelivr.net/npm/@supabase/supabase-js@<ver>/dist/umd/supabase.js`) → `js/vendor/` ablegen, alten löschen, Dateinamen im `<script>`-Tag (app.html) + Doku anpassen. Muss self-contained sein (keine `import`/`/npm`-Statements).
 - **Fonts aktualisieren**: Google-`css2`-URL mit Browser-User-Agent holen (liefert woff2), nur `latin` + `latin-ext` Blöcke behalten, woff2 nach `assets/fonts/`, `url()` auf `../assets/fonts/<datei>` umschreiben → `css/fonts.css`.
-- Onboarding-Overlay anpassen: `index.html` (`#onboarding-overlay`) + `js/auth.js` (`maybeShowOnboarding`/`dismissOnboarding`, getriggert in `enterApp` nach dem ersten erfolgreichen Login).
-- Konto-Modal / Account-Löschung: `index.html` (`#account-modal`) + `js/auth.js` (Modal-Handler + `supabase.functions.invoke("delete-account")`).
+- Onboarding-Overlay anpassen: `app.html` (`#onboarding-overlay`) + `js/auth.js` (`maybeShowOnboarding`/`dismissOnboarding`, getriggert in `enterApp` nach dem ersten erfolgreichen Login).
+- Konto-Modal / Account-Löschung: `app.html` (`#account-modal`) + `js/auth.js` (Modal-Handler + `supabase.functions.invoke("delete-account")`).
+- Landingpage anpassen: `index.html` + `css/landing.css` (`.lp-*`). CTAs zeigen auf `app.html`; Footer-Links auf die Rechtsseiten. App-Mockup ist statisches HTML/CSS (`.lpm-*`).
 - Rechtsseiten erstellen/ändern: Quelltexte in `docs/legal-texts/` (`impressum.txt` / `datenschutz.txt` / `agb.txt`) bearbeiten → `python scripts/render-legal.py` rendert sie zu `*.html` im Root. HTML **nie** von Hand editieren (wird überschrieben). Stil/Footer in `css/legal.css`.
 
 ---
@@ -214,9 +217,11 @@ Alle Setter sind **optimistic**: Cache wird sofort aktualisiert + `render()` lä
 - US-Transfers (Mailtrap, Supabase-Sub-Verarbeiter) abgesichert über **EU-US Data Privacy Framework UND/ODER EU-Standardvertragsklauseln** (DPF in Kraft, EuGH-Berufung anhängig — SCC als Auffangschirm; Formulierung bewusst robust gehalten).
 - **„Keine Anlageberatung"** (AGB § 6) hält außerhalb der BaFin-Regulierung, solange reiner Tracker + allgemeine Tipps.
 
-**Footer:** Geteilter `.legal-footer` (Impressum · Datenschutz · AGB · Zur App) auf allen drei Rechtsseiten **und** im App-Container (`index.html`, lädt jetzt `legal.css`) — sichtbar für eingeloggte User. **WICHTIG: alle drei Rechtsseiten zusammen deployen** (sonst tote Links).
+**Footer / Erreichbarkeit der Rechtsseiten:** Impressum/Datenschutz/AGB sind erreichbar (1) auf jeder Rechtsseite selbst (geteilter `.legal-footer`), (2) im App-Container (`app.html`, lädt `legal.css`) für eingeloggte User, und (3) **pre-login im Footer der Landingpage** (`index.html`). **WICHTIG: alle drei Rechtsseiten zusammen deployen** (sonst tote Links).
 
-**Offen in Phase 3:** Landingpage (öffentlicher Einstieg) — die trägt dann den Footer auch **pre-login** (aktuell ist die `.legal-footer` nur im signed-in App-Container; der Auth-Gate hat noch keinen).
+**Landingpage** (`index.html` + `css/landing.css`): öffentliche Startseite im „Midnight Ledger"-Stil — Editorial-Hero mit statischem App-Mockup (`.lpm-*`), 4 Feature-Karten, Privacy-Sektion (EU-Server, kein Tracking, keine Bankverbindung, jederzeit löschbar), CTA-Band, Footer. Alle „Starten/Anmelden"-CTAs → `app.html`. Theme-Übernahme aus `fc-theme` + Toggle.
+
+**Offen in Phase 3:** nur noch User-seitig — Supabase Auth-URLs auf `/app.html` (s. „Deployment") + Browser-Test der neuen Struktur.
 
 
 
@@ -230,7 +235,7 @@ Stack-Entscheidung für die App: **Capacitor** — verpackt die bestehende Vanil
 | **1 — Fundament** | Multi-User-Basis | Supabase, Auth, RLS, 4 Tabs | — | ✅ erledigt |
 | **2 — Web-App härten** | Vom Prototyp zum stabilen Produkt | **RLS-Audit** (User A darf nie Daten von User B sehen) · Account-Löschung in-App (Apple-Pflicht) · Error-Handling · Empty-State/Onboarding · Mobile-Layout · CDN-Imports lokal ins Projekt holen | ~2–3 Wo | ✅ erledigt (Tests bestanden) |
 | **2.5 — Go-Live (Staging)** | Live-URL als Voraussetzung für Phase 3+4 | Deployment auf Hostinger (`akradev.de`) via Git-Deploy (GitHub-OAuth-Auto-Deploy) · `config.js` committet · Supabase Auth-URLs auf Domain · HTTPS/SSL · Mailtrap-SMTP · Edge Function `delete-account` live | ~1–2 Tage | ✅ erledigt (1 Restbug, s.u.) |
-| **3 — Recht & Landing** | Pflicht vor Veröffentlichung | ✅ Impressum · ✅ Datenschutz (DSGVO) · ✅ AGB · ✅ Support-Postfach · ✅ DPAs abgelegt · ✅ Cookie-Banner-Entscheidung · ✅ Rechtsseiten als HTML gerendert + App-Footer · offen: Landingpage (+ pre-login-Footer) | ~1 Wo | in Arbeit |
+| **3 — Recht & Landing** | Pflicht vor Veröffentlichung | ✅ Impressum · ✅ Datenschutz (DSGVO) · ✅ AGB · ✅ Support-Postfach · ✅ DPAs abgelegt · ✅ Cookie-Banner-Entscheidung · ✅ Rechtsseiten als HTML gerendert · ✅ Landingpage (index.html, App → app.html) · offen: Supabase-Redirect auf /app.html + Browser-Test | ~1 Wo | fast fertig |
 | **4 — Closed Beta** | Validieren *bevor* App-Aufwand entsteht | 5–10 echte Tester · Feedback · Bugfixing | ~2–3 Wo (parallel) | offen |
 | **5 — Native Wrapping** | Beide Stores aus einer Codebasis | Capacitor einrichten · Android-Build (PC) · iOS-Build (Mac) · Test auf echten Geräten · Icon/Splash | ~1–2 Wo | offen |
 | **6 — Store-Launch** | Live in Play Store + App Store | Developer-Accounts (Google + Apple) · Store-Assets/Screenshots · Datensicherheits-/Privacy-Formulare · Einreichung · Review-Runden | ~2–4 Wo | offen |

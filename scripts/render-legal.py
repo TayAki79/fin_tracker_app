@@ -161,7 +161,7 @@ TEMPLATE = """<!DOCTYPE html>
   <a class="legal-wordmark" href="index.html">Finanz<span class="amp">·</span>Cockpit</a>
   <div class="legal-actions">
     <button class="legal-theme-btn" id="legal-theme-btn" type="button" aria-label="Theme wechseln" onclick="fcLegalToggleTheme()">🌙</button>
-    <a class="legal-back" href="index.html">Zurück zur App</a>
+    <a class="legal-back" href="app.html">Zurück zur App</a>
   </div>
 </header>
 
@@ -176,7 +176,7 @@ TEMPLATE = """<!DOCTYPE html>
   <span class="legal-footer-sep">·</span>
   <a href="agb.html"%%CUR_AGB%%>AGB</a>
   <span class="legal-footer-sep">·</span>
-  <a href="index.html">Zur App</a>
+  <a href="app.html">Zur App</a>
   <span class="legal-footer-copy">© 2026 Finanz·Cockpit</span>
 </footer>
 
