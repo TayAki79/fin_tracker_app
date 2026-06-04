@@ -197,7 +197,7 @@ Stack-Entscheidung für die App: **Capacitor** — verpackt die bestehende Vanil
 |---|---|---|---|---|
 | **1 — Fundament** | Multi-User-Basis | Supabase, Auth, RLS, 4 Tabs | — | ✅ erledigt |
 | **2 — Web-App härten** | Vom Prototyp zum stabilen Produkt | **RLS-Audit** (User A darf nie Daten von User B sehen) · Account-Löschung in-App (Apple-Pflicht) · Error-Handling · Empty-State/Onboarding · Mobile-Layout · CDN-Imports lokal ins Projekt holen | ~2–3 Wo | ✅ erledigt (Tests bestanden) |
-| **2.5 — Go-Live (Staging)** | Live-URL als Voraussetzung für Phase 3+4 | Deployment auf Hostinger (`akradev.de`) via Git-Deploy · `config.js` auf Server · Supabase Auth-URLs (Site URL + Redirects) auf Produktions-Domain · HTTPS/SSL · Edge Function live | ~1–2 Tage | in Arbeit |
+| **2.5 — Go-Live (Staging)** | Live-URL als Voraussetzung für Phase 3+4 | Deployment auf Hostinger (`akradev.de`) via Git-Deploy (GitHub-OAuth-Auto-Deploy) · `config.js` committet · Supabase Auth-URLs auf Domain · HTTPS/SSL · Mailtrap-SMTP · Edge Function `delete-account` live | ~1–2 Tage | ✅ erledigt (1 Restbug, s.u.) |
 | **3 — Recht & Landing** | Pflicht vor Veröffentlichung | Impressum · Datenschutz (DSGVO) · AGB · Support-URL · Landingpage | ~1 Wo | offen |
 | **4 — Closed Beta** | Validieren *bevor* App-Aufwand entsteht | 5–10 echte Tester · Feedback · Bugfixing | ~2–3 Wo (parallel) | offen |
 | **5 — Native Wrapping** | Beide Stores aus einer Codebasis | Capacitor einrichten · Android-Build (PC) · iOS-Build (Mac) · Test auf echten Geräten · Icon/Splash | ~1–2 Wo | offen |
@@ -209,6 +209,10 @@ Stack-Entscheidung für die App: **Capacitor** — verpackt die bestehende Vanil
 **Grundregel:** In den Store kommen ≠ Geld verdienen. Phase 4 (echte Tester) steht bewusst VOR dem App-Aufwand. Erst validieren, dann verpacken.
 
 **Plattform-Strategie:** Aktuell kein eigener Mac. Geplant: **Mac wird in Phase 5 angeschafft** (iOS-Builds gehen nur auf macOS/Xcode). Damit laufen beide Stores parallel über denselben Capacitor-Code — Android-Build auf dem PC, iOS-Build auf dem Mac. Cloud-Build-Dienste (z. B. Codemagic) bleiben als Fallback notiert, sind aber bei eigenem Mac nicht nötig.
+
+## Bekannte Bugs (vor Beta beheben)
+
+- **Session-Handling nach ungültigem/abgelaufenem Token** (Fix bewusst auf Testphase verschoben): Nach Account-Löschung erfolgt **kein Redirect zum Login** (Dashboard bleibt sichtbar); nach Refresh landet man im **Dashboard mit Nullwerten** statt am Login. Tritt auch ohne Löschung beim Refresh auf (vorbestehend, vermutlich dieselbe Wurzel). Vermutung: `signOut({scope:'local'})` räumt die Session nicht weg / `stateBootstrap()` flippt trotz leerem/ungültigem Token auf `signed-in`. Ansatz: `js/auth.js` (Lösch-Handler hartes Teardown + `enterApp`/`onAuthStateChange` leeren Bootstrap als Fehlerzustand behandeln) und `js/state.js` (`stateBootstrap`).
 
 ## Kostenübersicht
 
